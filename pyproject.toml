@@ -24,6 +24,7 @@ dependencies = [
     "tqdm (>=4.67.1,<5.0.0)",
     "torchvision (==0.24.1+cu128)",
     "torchaudio (==2.9.1+cu128)"
+    "gdown (>=5.2.1,<6.0.0)"
 ]
 
 
