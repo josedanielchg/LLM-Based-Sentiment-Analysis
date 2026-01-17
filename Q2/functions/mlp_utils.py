@@ -66,3 +66,21 @@ def predict_proba(model, loader,device):
 
     y_pred = probs.argmax(axis=1)
     return y_true, y_pred, probs
+
+def evaluate_loss(model, loader, criterion, device):
+    model.eval()
+    total_loss = 0.0
+    total = 0
+    with torch.no_grad():
+        for batch in loader:
+            x = batch["x"].to(device)
+            y = batch["label"].to(device)
+            out = model(x)
+            loss = criterion(out, y)
+            total_loss += loss.item() * y.size(0)
+            total += y.size(0)
+    return total_loss / total
+
+best_val = float("inf")
+patience = 5
+wait = 0
