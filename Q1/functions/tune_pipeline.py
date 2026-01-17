@@ -71,7 +71,8 @@ def tune_pipeline(vectorizer, model, param_grid, X_train, y_train, model_name,
 
     return search
 
-# source : https://neuralib.readthedocs.io/en/v0.4.1/_modules/neuralib/util/tqdm.html
+
+# External class taken from: https://neuralib.readthedocs.io/en/v0.4.1/_modules/neuralib/util/tqdm.html
 
 @contextmanager
 def tqdm_joblib(tqdm_bar):

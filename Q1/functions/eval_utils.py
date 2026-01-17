@@ -2,6 +2,8 @@
 import seaborn as sns
 import pandas as pd
 import numpy as np
+import torch
+
 import os
 from sklearn.metrics import (
     classification_report, confusion_matrix, accuracy_score, 
@@ -88,3 +90,4 @@ def evaluate_model(y_true, y_pred, y_probs, model_name, output_path="reports/"):
     print(f"Full report exported successfully: {save_path}")
     
     plt.show()
+
