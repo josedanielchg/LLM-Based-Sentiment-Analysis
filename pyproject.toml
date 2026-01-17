@@ -19,7 +19,9 @@ dependencies = [
     "kagglehub (>=0.4.0,<0.5.0)",
     "jupyter (>=1.1.1,<2.0.0)",
     "ipykernel (>=7.1.0,<8.0.0)",
-    "plotly (>=6.5.2,<7.0.0)"
+    "plotly (>=6.5.2,<7.0.0)",
+    "jupyterlab-widgets (==3.0.15)",
+    "tqdm (>=4.67.1,<5.0.0)"
 ]
 
 
