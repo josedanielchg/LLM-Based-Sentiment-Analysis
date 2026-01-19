@@ -1,5 +1,3 @@
-#import google.generativeai as genai
-
 from google import genai
 from google.genai import types
 import pandas as pd
@@ -20,10 +18,6 @@ GEMINI_API_KEY = "AIzaSyANge03Cu83ioyMtavor3UqBcAiC2AgH3s"
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 MODEL_NAME = "models/gemma-3-4b-it"
-
-#genai.configure(api_key=GEMINI_API_KEY)
-#model = genai.GenerativeModel('models/gemma-3-4b-it')
-
 
 def evaluate_model(y_true, y_pred, model_name, output_path="reports/"):
    
@@ -115,7 +109,6 @@ def get_gemini_pred(text):
             model=MODEL_NAME,
             contents=prompt
         )
-        #response = model.generate_content(prompt)
         prediccion = response.text.strip().lower()        
         prediccion = prediccion.replace(".", "").replace("\n", "")
         
