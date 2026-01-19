@@ -346,6 +346,53 @@ Additionally, when using BERT embeddings, the transformations applied during the
 
 For training, cross-entropy loss is defined as the optimization criterion. In addition, a maximum of 50 training epochs is proposed, with a fast stopping criterion of $1\times 10^{-4}$, and a learning rate of $1\times 10^{-4}$ is used. The Adam optimizer is defined and applied to all trained networks. It is also important to highlight that the training algorithm used for these MLPs is the same as the one employed for training the other models, which allows their performance to be compared under consistent training conditions. The results of all pipelines described in this section are analyzed in the following section.
 
+\section{Q5-Bert embeddings vs. Raw representations}
+
+Although the difference implied by representing raw text through any of the classic frequency-based vectorization methods and the use of BERT embeddings has already been addressed in the MLP training section, it is appropriate to discuss in greater detail the difference between these two forms of numerical representation for textual elements: approaches based on frequency occurrence counts and transformer-based representations.
+
+The first element that stands out among these differences is that BERT is a transformer encoder that is pre-trained with the objective of producing bidirectional contextual representations. This means that the resulting token representations are encoded using both left and right context, that is, the words that appear before and after each token within the tokenized sequence \cite{b18}.
+
+BERT produces contextualized token-level representations which, through a pooling operation, yield a dense, fixed-size embedding per text. This embedding corresponds to a 768-dimensional vector, which becomes the input dimension of the classifier. This significant difference in dimensionality between using a frequency-based vectorization model and using BERT embeddings is the first differentiating factor that motivates the use of the latter over the traditional approach.
+
+To highlight the effect that this change in dimensionality has on the training of the classifier model, it is proposed to isolate the MLP from the pipeline and analyze the number of parameters of the network as a function of its input, and to quantitatively compare the difference between the size of a network that receives as input a frequency-based vectorizer representation, such as the character-level case used in training, and one that uses BERT embeddings. For this exercise, the parameter-count Eq. (\ref{eq:param_count_fc}) for a fully connected layer is used, which consists of a weight matrix and a bias term, and is deduced from the infromation provided by PyTorch \cite{b19}.
+
+\begin{equation}
+params  = (infeatures\cdot outfeatures) + outfeatures
+\label{eq:param_count_fc}
+\end{equation}
+
+By applying this equation to a neural network with the structure $\texttt{INPUT\_DIM} \rightarrow 1024 \rightarrow 512 \rightarrow 256 \rightarrow 3$, and using Eq.~(\ref{eq:param_count_mlp_char}), a total of 10{,}897{,}923 parameters is obtained for the MLP, whereas with the same structure but with an input layer adapted to a BERT embedding, as shown in Eq.~(\ref{eq:param_count_mlp_bert}), 1{,}444{,}355 parameters are obtained, a reduction of $\approx 86.75\%$. This reduction is highly relevant when pursuing generalization and training stability, since it decreases the risk of overfitting: the relationship between training data and parameters makes memorization of noise or spurious dynamics less likely. Additionally, a model can be obtained that is less sensitive to regularization strategies, and, focusing only on the MLP training, the computational cost of training is reduced, an effect that becomes evident in the training performed during the testing phase detailed in Q2 and Q3.
+
+\begin{equation}
+\begin{gathered}
+P_{1}\,(10000 \rightarrow 1024) = 10000 \cdot 1024 + 1024 = 10{,}241{,}024, \\
+P_{2}\,(1024 \rightarrow 512)  = 1024 \cdot 512 + 512 = 524{,}800, \\
+P_{3}\,(512 \rightarrow 256)   = 512 \cdot 256 + 256 = 131{,}328, \\
+P_{4}\,(256 \rightarrow 3)     = 256 \cdot 3 + 3 = 771, \\
+P_{\text{total}}               = P_{1}+P_{2}+P_{3}+P_{4} = 10{,}897{,}923.
+\end{gathered}
+\label{eq:param_count_mlp_char}
+\end{equation}
+
+\begin{equation}
+\begin{gathered}
+P_{1}\,(768 \rightarrow 1024)  = 768 \cdot 1024 + 1024 = 787{,}456, \\
+P_{2}\,(1024 \rightarrow 512)  = 1024 \cdot 512 + 512 = 524{,}800, \\
+P_{3}\,(512 \rightarrow 256)   = 512 \cdot 256 + 256 = 131{,}328, \\
+P_{4}\,(256 \rightarrow 3)     = 256 \cdot 3 + 3 = 771, \\
+P_{\text{total}}               = P_{1}+P_{2}+P_{3}+P_{4} = 1{,}444{,}355.
+\end{gathered}
+\label{eq:param_count_mlp_bert}
+\end{equation}
+
+The output of frequency-based vectorization models is generally a sparse matrix, which implies that the information is effectively concentrated in only a few active indices. This is directly related not only to the sparsity already mentioned, but also to the implicit presence of null values in the CSR matrix: even if they are not explicitly stored in memory, they expose the model to a considerable sensitivity to network width and to regularization methods, requiring strict control to avoid overtraining. This clearly complicates not only obtaining optimal performance, but also defining the network structure, since subtle variations in layer width can have a substantial effect on the risk of overfitting. In contrast, when using BERT embeddings the matrix is dense and low-dimensional. This typically reduces the size of the downstream classifier needed, and therefore makes the selection of an MLP structure and the choice of regularization parameters easier and less critical. The simplicity in selecting the neural network structure further increases when considering the third key factor proposed to differentiate the advantages of embeddings over classical methods, namely, the sensitivity of each method to context.
+
+Context sensitivity is perhaps the most noticeable and marked difference between the two methods, and it favors the implementation of pipelines with BERT embeddings rather than with frequency-count-based vectorizers. This is because BERT is robustly pre-trained on much larger language corpora and, in addition, it is specifically designed to incorporate context into the vector definition of the words in a document, thanks to the structure and functioning detailed in Section Q4. In contrast, classical vectorization strategies can only capture superficial contextual information obtained through frequency counts or, at best, through the analysis derived from that frequency space, which limits their representation of fundamental semantic aspects that can be decisive when classifying a short message into a sentiment/polarity category. Furthermore, the fact that a BERT embedding is so robust, condensed, and information-rich enables the exploration of simpler models for message classification. That is, in BERT the complexity is mainly concentrated in the pre-training of the model used to obtain the embeddings, and the MLP is isolated from that complexity and only needs to map and classify highly informative vectors. In contrast, when traditional vectorization methods are used, part of the complexity that is covered by BERT pre-training must be handled by the neural network itself, which makes it possible in the BERT case to use networks with fewer layers, or even a single linear classification head, while still achieving results comparable to more complex MLP models trained with traditional vectorization techniques.
+
+Although the benefits of using BERT as an embedding extractor become evident, it is essential to emphasize that using BERT as a frozen embedding extractor is not the same as using it adapted to the task, that is, applying fine-tuning that allows the internal representations to align with the classification objective and with the distribution of the training data. This is of critical importance, for example, in short-text analysis or classification tasks such as the one considered here, where adopting a fine-tuning strategy such as LoRA, which is described in Q6, enables obtaining better classifier performance than using BERT only for frozen embedding extraction. It is through these fine-tuning strategies that the main disadvantage of BERT as a frozen embedding extractor can be mitigated with respect to classical vectors, namely that its representation is external to the domain of the training data. In other words, it is sensitive to context by BERT's own definition, but not to parameters such as the frequency of token presence in the training set and other properties that arise because the transformer training is already fixed and, in frozen embedding extraction, no learning takes place.
+
+It is ultimately concluded that BERT is more attractive than classical methods mainly due to its ability to represent semantics and context, which classical methods do not possess. This is therefore associated with a denser input that requires less complexity in the classification MLP. In addition, the possibility of implementing fine-tuning strategies that counteract the domain-agnostic effect of the embedding extractor's pre-training, and that allow the domain of the training dataset to permeate the document embedding representation, can substantially improve model performance. 
+
 \begin{thebibliography}{00}
 
 \bibitem{b1} T. Finn and A. Downie, ``How can sentiment analysis be used to improve customer experience?,'' \emph{IBM Think}, accessed Jan. 18, 2026. [Online]. Available: https://www.ibm.com/think/insights/how-can-sentiment-analysis-be-used-to-improve-customer-experience
@@ -381,6 +428,10 @@ For training, cross-entropy loss is defined as the optimization criterion. In ad
 \bibitem{b16} scikit-learn developers, ``sklearn.preprocessing.StandardScaler,'' \emph{scikit-learn Documentation}, accessed Jan. 18, 2026. [Online]. Available: https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html
 
 \bibitem{b17} Sutriawan, Supriadi Rustad, Guruh Fajar Shidik, and Pujiono, ``Performance Evaluation of Text Embedding Models for Ambiguity Classification in Indonesian News Corpus: A Comparative Study of TF-IDF, Word2Vec, FastText, BERT, and GPT,'' \emph{Ing\'enierie des Syst\`emes d'Information}, vol. 30, no. 6, pp. 1469--1482, June 2025, doi: 10.18280/isi.300606. [Online]. Available: https://www.iieta.org/journals/isi/paper/10.18280/isi.300606
+
+\bibitem{b18} J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, ``BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding,'' \emph{Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)}, pp. 4171--4186, Minneapolis, Minnesota, Jun. 2019, doi: 10.18653/v1/N19-1423. [Online]. Available: https://aclanthology.org/N19-1423/
+
+\bibitem{b19} PyTorch contributors, ``torch.nn.Linear,'' \emph{PyTorch Documentation}, accessed Jan. 18, 2026. [Online]. Available: https://docs.pytorch.org/docs/stable/generated/torch.nn.Linear.html
 
 \end{thebibliography}
 \end{document}
