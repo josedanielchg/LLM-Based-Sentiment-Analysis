@@ -345,6 +345,75 @@ Additionally, when using BERT embeddings, the transformations applied during the
 \end{enumerate}
 
 For training, cross-entropy loss is defined as the optimization criterion. In addition, a maximum of 50 training epochs is proposed, with a fast stopping criterion of $1\times 10^{-4}$, and a learning rate of $1\times 10^{-4}$ is used. The Adam optimizer is defined and applied to all trained networks. It is also important to highlight that the training algorithm used for these MLPs is the same as the one employed for training the other models, which allows their performance to be compared under consistent training conditions. The results of all pipelines described in this section are analyzed in the following section.
+\section{Q4: Comparative Analysis with Large Language Models (LLMs)}
+
+This analysis focuses on comparing the performance of the optimized BERT-based architecture against a modern Large Language Model (LLM). The fundamental objective is to evaluate whether a general-purpose generative model, operating solely in inference mode, is capable of competing with or surpassing the effectiveness of a specialized encoder that has undergone fine-tuning.
+\subsection{Methodology: Generative Inference}
+
+For this comparison, we selected \texttt{gemma-3-4b-it}, an instruction-tuned model from Google's Gemma family with approximately 4 billion parameters. Unlike the BERT implementation, where the model weights were updated via backpropagation to minimize cross-entropy loss (fine-tuning), the LLM was employed using a \textbf{Few-Shot Prompting} strategy via the Google GenAI API.
+
+The experimental setup was defined as follows:
+\begin{itemize}
+    \item \textbf{Prompt Engineering:} The model was explicitly instructed to act as a "sentiment analysis expert".
+    \item \textbf{Few-Shot Context:} To guide the model's reasoning without weight updates, three labeled examples (one for each class: Positive, Negative, Neutral) were provided in the prompt context window before the target query.
+    \item \textbf{Output Constraints:} The generation was restricted to output single-word labels mapped to our numeric classes ($0, 1, 2$).
+    \item \textbf{Evaluation Subset:} Due to API rate limits and latency constraints, the evaluation was conducted on a representative subset of 1,000 samples from the test set.
+\end{itemize}
+
+\subsection{Performance Evaluation}
+
+We compare the generative capabilities of Gemma against the \texttt{BERT Linear Head} model, which yielded the highest performance among the BERT configurations tested in the previous section.
+
+\subsubsection{LLM Results (Gemma-3-4b-it)}
+Fig. \ref{fig:gemma_res} presents the classification report for the generative model. Gemma achieved an \textbf{Accuracy of 0.632} and a \textbf{Macro F1 of 0.630}.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q4/gemma_report.png}
+  \caption{Performance Report for Gemma-3-4b-it (Few-Shot Inference). The model shows a balanced but moderate performance, with notable confusion between polarized sentiments and the neutral class.}
+  \label{fig:gemma_res}
+\end{figure}
+
+The confusion matrix reveals a specific weakness: a tendency to misclassify polarized tweets (Positive/Negative) as Neutral. This behavior is often attributed to the safety alignment (RLHF) of instruction-tuned models, which biases them towards neutral or non-committal responses when facing ambiguity.
+
+\subsubsection{BERT-based Results}
+Fig. \ref{fig:bert_best} displays the performance of the fine-tuned \texttt{BERT Linear Head}. This model achieved an \textbf{Accuracy of 0.664} and a \textbf{Macro F1 of 0.666}.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q4/bert_best_report.png}
+  \caption{Performance Report for the BERT Linear Head Baseline.}
+  \label{fig:bert_best}
+\end{figure}
+
+The BERT model demonstrates a stronger diagonal in the confusion matrix, indicating superior discriminative power for this specific data distribution compared to the few-shot LLM.
+
+\subsection{Discussion: Specialization vs. Generalization}
+
+The comparison between the specialized encoder (BERT) and the generalist decoder (Gemma) offers valuable insights, summarized in Table \ref{tab:llm_vs_bert}.
+
+\begin{table}[htbp]
+\caption{Head-to-Head: Fine-Tuned Encoder vs. Few-Shot LLM}
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Params} & \textbf{Method} & \textbf{Macro F1} \\
+\hline
+\textbf{BERT (Linear)} & \textbf{110M} & \textbf{Fine-Tuning} & \textbf{0.666} \\
+\hline
+Gemma-3-4b-it & 4B & Few-Shot & 0.630 \\
+\hline
+\end{tabular}
+\label{tab:llm_vs_bert}
+\end{center}
+\end{table}
+
+\begin{enumerate}
+    \item \textbf{Performance Gap:} The fine-tuned BERT model outperforms the LLM by approximately \textbf{3.6\% in Macro F1}. This confirms that, for this dataset, a smaller model adapted to the specific domain (via fine-tuning) is more effective than a massive model relying on general knowledge (few-shot).
+    
+    \item \textbf{Resource Efficiency:} The efficiency gap is substantial. The BERT model (110M parameters) can be deployed for inference with low latency on standard hardware. In contrast, the LLM (4B parameters) requires significant VRAM or API dependence, with observed latencies in the range of seconds per query.
+    
+\end{enumerate}
 
 \input{sections/Q3}
 
