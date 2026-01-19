@@ -287,6 +287,65 @@ For the training of all the proposed MLPs, the cross-entropy criterion is employ
 
 Training is carried out with an epoch-based loop, as proposed in the course development. During each pass, the \texttt{train\_loader} (the DataLoader for the training set) provides the input dictionary containing the tensors and their labels, which are transferred to the computing device, in this case the GPU. For each batch, the optimizer is reset and the model output is computed, followed by the corresponding loss value using cross-entropy loss, as defined previously. Subsequently, backpropagation is executed and the model parameters are updated through an \texttt{Adam} optimizer step. This procedure is applied for up to 50 epochs, subject to the early stopping criterion, and the trained model is saved at the end either as an in-memory object or as a \texttt{.pt} file.
 
+Considering the design and training choices described above, these models are obtained for each of the vectorized representations, and their results are analyzed later. However, the point previously discussed remains relevant: frequency-based vectorization methods provide only a representation derived from a frequency analysis of the document, and they do not account for aspects such as token position within the text or semantic considerations. This motivates the reflection that it may be convenient to implement a denser vector representation that incorporates this conceptual information through word tokenization. In this way, the use of BERT embeddings is considered, and therefore the evaluation of MLP structures within a pipeline in which the first stage is not frequency-based vectorization, but rather an embedding-based vectorization using BERT. The causes and consequences of this implementation are discussed in the specific sections devoted to BERT embeddings, and especially in terms of the implications it introduces with respect to an approach based on raw text.
+
+Changing the vectorization approach implies that the elements used for training the neural networks described previously, as well as the network structure itself, must be modified. For this reason, it is proposed to first describe the change in the DataLoader structure, which, unlike the case of frequency-based vectors, no longer provides the final features but instead yields tokenized text, since the features (embeddings) are generated when the tensors are passed through BERT. In this setup, the \texttt{collate} function is not applied because the BERT tokenizer already returns fixed-size, compatible tensors. Thus, the DataLoader outputs \texttt{"input\_ids"} + \texttt{"attention\_mask"} + \texttt{"label"}, and the embedding is produced by passing these tensors through BERT \cite{b15}.
+
+This DataLoader is converted into embeddings through an embedding-extraction function, by setting BERT to evaluation mode and executing the forward pass. After that, pooling is applied in order to obtain a single vector per text, and the resulting batches are concatenated. The final output is therefore a dense matrix, which is standardized using a \texttt{StandardScaler} that transforms each feature so that, on the training set, the mean is zero and the standard deviation is one. This ensures that the embedding dimensions have a comparable scale, which improves training stability and prevents some dimensions from having a dominant effect due to higher variance \cite{b16}.
+
+The output of the scaling step is converted into a DataLoader for the MLP that is comparable to the one used when training the vectorizer-based methods. This DataLoader constructs batches of dense embeddings and their corresponding labels in the form \{\texttt{"x"}: \texttt{X\_batch}, \texttt{"label"}: \texttt{y\_batch}\}, which are then used for training the model and for its subsequent performance evaluation.
+
+Given the embedding-based vectorization process and the role of the DataLoaders at this stage with BERT and the MLP, it is appropriate to discuss the general modifications in the structure of the models trained for the pipelines that use BERT embeddings. The first effect is that the input dimension changes considerably: it goes from more than 6000 input features to a much smaller and fixed input size, which in the base case is 768. BERT produces a dense output matrix containing real-valued activations in almost all dimensions, which is stored as a dense vector; by contrast, frequency-based vectorizations yield sparse representations with many zeros. This difference implies that the MLP design must control capacity (width and depth) in relation to the input space: for sparse, high-dimensional inputs, regularization plays a fundamental role to avoid memorization effects caused by an input space that is very high-dimensional and mostly empty. In the case of BERT, the dense input implies that most of the representational complexity is handled by the BERT forward pass that produces the embeddings, so the subsequent mapping from that informative vector space to the target classes becomes simpler.
+
+Additionally, when using BERT embeddings, the transformations applied during the forward pass already encode syntactic and semantic information in the vector according to the characteristics of the BERT model being used, whereas TF--IDF corresponds to a comparatively superficial representation that mainly reflects frequency analysis. Therefore, for pipelines in which BERT provides the input to the MLP, the representation is already highly informative and the required MLP complexity decreases considerably; in some cases, even a linear head is sufficient to achieve the expected performance \cite{b17}. Considering these conditions, the four architectures proposed for the BERT-embedding pipelines are less complex, with fewer layers and smaller widths than those used in the previous pipelines, and they are the following.
+
+\begin{enumerate}
+    \item \textbf{LinearHead\_baseline (single linear layer)}
+    \begin{itemize}
+        \item \textbf{Input layer (reshape).}
+        \item \textbf{Final layer} (\texttt{Linear} $768 \rightarrow \texttt{NUM\_CLASSES}$): directly projects the 768-dimensional embedding to the 3 classes (sentiment/polarity), with no hidden layers or intermediate activations.
+        \item \textbf{Output}: corresponds to the final class decision.
+    \end{itemize}
+
+    \item \textbf{MLP\_256\_64\_drop0\_2 }
+    \begin{itemize}
+        \item \textbf{Input layer (reshape).}
+        \item \textbf{Layer 1} (\texttt{Linear} $768 \rightarrow 256$): transforms the input representation into 256 units.
+        \item \textbf{Activation 1}: ReLU.
+        \item \textbf{Regularization 1}: Dropout ($p=0.2$).
+        \item \textbf{Layer 2} (\texttt{Linear} $256 \rightarrow 64$): reduces/compresses the representation to 64 units.
+        \item \textbf{Activation 2}: ReLU.
+        \item \textbf{Regularization 2}: Dropout ($p=0.2$).
+        \item \textbf{Output layer} (\texttt{Linear} $64 \rightarrow \texttt{NUM\_CLASSES}$): projects the final representation to 3 classes and defines the polarity prediction.
+    \end{itemize}
+
+    \item \textbf{MLP\_128\_32\_drop0\_2 }
+    \begin{itemize}
+        \item \textbf{Input layer (reshape).}
+        \item \textbf{Layer 1} (\texttt{Linear} $768 \rightarrow 128$): compresses the vector representation to 128 units.
+        \item \textbf{Activation 1}: ReLU.
+        \item \textbf{Regularization 1}: Dropout ($p=0.2$).
+        \item \textbf{Layer 2} (\texttt{Linear} $128 \rightarrow 32$): reduces the representation to 32 units to extract more compact patterns.
+        \item \textbf{Activation 2}: ReLU.
+        \item \textbf{Regularization 2}: Dropout ($p=0.2$).
+        \item \textbf{Output layer} (\texttt{Linear} $32 \rightarrow \texttt{NUM\_CLASSES}$): projects the output to the 3 sentiment classes and corresponds to the final decision.
+    \end{itemize}
+
+    \item \textbf{MLP\_512\_128\_drop0\_3 }
+    \begin{itemize}
+        \item \textbf{Input layer (reshape).}
+        \item \textbf{Layer 1} (\texttt{Linear} $768 \rightarrow 512$): expands/transforms the representation into a 512-unit dense space to capture more complex relationships.
+        \item \textbf{Activation 1}: ReLU.
+        \item \textbf{Regularization 1}: Dropout ($p=0.3$).
+        \item \textbf{Layer 2} (\texttt{Linear} $512 \rightarrow 128$): compresses the representation to 128 units while preserving the most relevant information.
+        \item \textbf{Activation 2}: ReLU.
+        \item \textbf{Regularization 2}: Dropout ($p=0.3$).
+        \item \textbf{Output layer} (\texttt{Linear} $128 \rightarrow \texttt{NUM\_CLASSES}$): projects the final representation to the 3 classes (sentiment/polarity) and defines the class decision.
+    \end{itemize}
+\end{enumerate}
+
+For training, cross-entropy loss is defined as the optimization criterion. In addition, a maximum of 50 training epochs is proposed, with a fast stopping criterion of $1\times 10^{-4}$, and a learning rate of $1\times 10^{-4}$ is used. The Adam optimizer is defined and applied to all trained networks. It is also important to highlight that the training algorithm used for these MLPs is the same as the one employed for training the other models, which allows their performance to be compared under consistent training conditions. The results of all pipelines described in this section are analyzed in the following section.
+
 \begin{thebibliography}{00}
 
 \bibitem{b1} T. Finn and A. Downie, ``How can sentiment analysis be used to improve customer experience?,'' \emph{IBM Think}, accessed Jan. 18, 2026. [Online]. Available: https://www.ibm.com/think/insights/how-can-sentiment-analysis-be-used-to-improve-customer-experience
@@ -317,9 +376,11 @@ Training is carried out with an epoch-based loop, as proposed in the course deve
 
 \bibitem{b14} PyTorch contributors, ``Data Loading and Processing Tutorial,'' \emph{PyTorch Tutorials}. [Online]. Available: https://docs.pytorch.org/tutorials/beginner/data\_loading\_tutorial.html. Accessed: Jan. 18, 2026.
 
-\end{thebibliography}
-\vspace{12pt}
-\color{red}
-IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
+\bibitem{b15} Hugging Face, ``BERT,'' \emph{Transformers Documentation}. [Online]. Available: https://huggingface.co/docs/transformers/en/model\_doc/bert. Accessed: Jan. 18, 2026.
 
+\bibitem{b16} scikit-learn developers, ``sklearn.preprocessing.StandardScaler,'' \emph{scikit-learn Documentation}, accessed Jan. 18, 2026. [Online]. Available: https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html
+
+\bibitem{b17} Sutriawan, Supriadi Rustad, Guruh Fajar Shidik, and Pujiono, ``Performance Evaluation of Text Embedding Models for Ambiguity Classification in Indonesian News Corpus: A Comparative Study of TF-IDF, Word2Vec, FastText, BERT, and GPT,'' \emph{Ing\'enierie des Syst\`emes d'Information}, vol. 30, no. 6, pp. 1469--1482, June 2025, doi: 10.18280/isi.300606. [Online]. Available: https://www.iieta.org/journals/isi/paper/10.18280/isi.300606
+
+\end{thebibliography}
 \end{document}
