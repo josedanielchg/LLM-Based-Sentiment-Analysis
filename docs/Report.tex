@@ -346,6 +346,8 @@ Additionally, when using BERT embeddings, the transformations applied during the
 
 For training, cross-entropy loss is defined as the optimization criterion. In addition, a maximum of 50 training epochs is proposed, with a fast stopping criterion of $1\times 10^{-4}$, and a learning rate of $1\times 10^{-4}$ is used. The Adam optimizer is defined and applied to all trained networks. It is also important to highlight that the training algorithm used for these MLPs is the same as the one employed for training the other models, which allows their performance to be compared under consistent training conditions. The results of all pipelines described in this section are analyzed in the following section.
 
+\input{sections/Q3}
+
 \section{Q5-Bert embeddings vs. Raw representations}
 
 Although the difference implied by representing raw text through any of the classic frequency-based vectorization methods and the use of BERT embeddings has already been addressed in the MLP training section, it is appropriate to discuss in greater detail the difference between these two forms of numerical representation for textual elements: approaches based on frequency occurrence counts and transformer-based representations.
@@ -499,6 +501,8 @@ As demonstrated in the ablation studies by Devlin et al., BERT can be applied to
 \end{figure}
 
 Experimental results shown in Fig. \ref{fig:bert_table} indicate that concatenating the token representations from the top four hidden layers yields performance competitive with fine-tuning (96.1 F1 vs 96.4 F1). In our theoretical framework, this justifies the use of extracted embeddings as robust inputs for downstream classifiers.
+
+\input{sections/Q7}
 
 \section{Conclusion}
 
