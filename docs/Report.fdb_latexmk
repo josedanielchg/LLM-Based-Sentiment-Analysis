@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1768847794.08886 "z:/Proyectos/Data/LLM-Based-Sentiment-Analysis/docs/Report.tex" "Report.pdf" "Report" 1768847805.63392 0
+["pdflatex"] 1768848409.91856 "z:/Proyectos/Data/LLM-Based-Sentiment-Analysis/docs/Report.tex" "Report.pdf" "Report" 1768848421.21676 0
   "C:/Users/jdani/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1768793951.54004 82507 a9eef8696c92627b87e9975edea03b2a ""
   "C:/Users/jdani/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1762879432.78351 24225047 017665dacde6f628aa195cd7e7feb06a ""
   "C:/Users/jdani/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc" 1458473887 4993 1194fb36dfcb11d9ae9802f2b00b60a3 ""
@@ -84,7 +84,7 @@
   "C:/Users/jdani/AppData/Local/Programs/MiKTeX/tex/latex/psnfss/ot1ptm.fd" 1585253778 1007 39eda417ef5837ce5e38661cfad2cedf ""
   "C:/Users/jdani/AppData/Local/Programs/MiKTeX/tex/latex/subfig/subfig.sty" 1121281010 22049 adc8323c809ccc2c21f05c93c1fe6ff3 ""
   "C:/Users/jdani/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1700127522 55487 80a65caedd3722f4c20a14a69e785d8f ""
-  "Report.aux" 1768847805.32032 14338 2abff124a98819e48ff7bd4cc27e2ae8 "pdflatex"
+  "Report.aux" 1768848420.95754 14439 78ad08b4856d05c8064851d195c273f8 "pdflatex"
   "images/Q0/Distribution_of_sentiments.png" 1768761954.61946 17539 c8591e12db71f15e3e910483e6c33cb9 ""
   "images/Q0/sentimentbycountry.png" 1768761954.61946 36422 ac1cd48d845c5dac05270d52333eced9 ""
   "images/Q0/sentimentbytypeoftweet.png" 1768761954.62048 22360 8487ae8bf521a7d933ee0315f6a9649d ""
@@ -119,7 +119,7 @@
   "images/Q3/mlp_train_recall_macro_barh_hue.png" 1768832285.09089 375928 a5b2d036c15614b0b2b52f4ce512665c ""
   "sections/Q1.tex" 1768809413.12288 16684 e1d7126298e87a8211e3837ac3aa208a ""
   "sections/Q3.tex" 1768847782.14821 13506 a3b2ceeb681a8e7d90135ba0b4426f3a ""
-  "z:/Proyectos/Data/LLM-Based-Sentiment-Analysis/docs/Report.tex" 1768838955.18908 55029 15eca0c621729d88fb50a15744d3c94f ""
+  "z:/Proyectos/Data/LLM-Based-Sentiment-Analysis/docs/Report.tex" 1768848390.39387 60225 b2aaf9ef5e7f56f8be47c159273ee977 ""
   (generated)
   "Report.aux"
   "Report.log"
