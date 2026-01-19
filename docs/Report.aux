@@ -118,68 +118,44 @@
 \citation{b15}
 \citation{b16}
 \citation{b17}
-\@writefile{toc}{\contentsline {section}{\numberline {V}Q3-Comparative Analysis of MLP Performance and Implications for Baseline Selection}{12}{}\protected@file@percent }
-\newlabel{sec:q3}{{V}{12}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Preliminary MLP performance analysis (Q2)}{13}{}\protected@file@percent }
-\newlabel{subsec:q3-mlp-prelim}{{\mbox  {V-A}}{13}}
-\@writefile{lof}{\contentsline {figure}{\numberline {24}{\ignorespaces MLP test performance comparison --- Macro-F1 (hue = representation family).\relax }}{13}{}\protected@file@percent }
-\newlabel{fig:q3-mlp-test-f1}{{24}{13}}
-\@writefile{lof}{\contentsline {figure}{\numberline {25}{\ignorespaces MLP test performance comparison --- Macro-Recall (hue = representation family).\relax }}{13}{}\protected@file@percent }
-\newlabel{fig:q3-mlp-test-recall}{{25}{13}}
-\@writefile{lof}{\contentsline {figure}{\numberline {26}{\ignorespaces MLP test performance comparison --- Accuracy (hue = representation family).\relax }}{13}{}\protected@file@percent }
-\newlabel{fig:q3-mlp-test-acc}{{26}{13}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Comparison across MLP representation families (predictive quality)}{13}{}\protected@file@percent }
-\newlabel{subsec:q3-mlp-families}{{\mbox  {V-B}}{13}}
-\newlabel{subsubsec:q3-char-tfidf}{{\mbox  {V-B}1}{13}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-B}1}Char TF--IDF (best family in predictive quality)}{13}{}\protected@file@percent }
-\newlabel{subsubsec:q3-bow-word}{{\mbox  {V-B}2}{13}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-B}2}BoW and Word TF--IDF (intermediate performance, with BoW slightly higher)}{13}{}\protected@file@percent }
-\newlabel{subsubsec:q3-bert}{{\mbox  {V-B}3}{13}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-B}3}BERT (competitive, but not superior to Char TF--IDF under this regime)}{13}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {27}{\ignorespaces MLP training performance comparison --- Accuracy (hue = representation family).\relax }}{14}{}\protected@file@percent }
-\newlabel{fig:q3-mlp-train-acc}{{27}{14}}
-\@writefile{lof}{\contentsline {figure}{\numberline {28}{\ignorespaces MLP training performance comparison --- Macro-F1 (hue = representation family).\relax }}{14}{}\protected@file@percent }
-\newlabel{fig:q3-mlp-train-f1}{{28}{14}}
-\@writefile{lof}{\contentsline {figure}{\numberline {29}{\ignorespaces MLP training performance comparison --- Macro-Recall (hue = representation family).\relax }}{14}{}\protected@file@percent }
-\newlabel{fig:q3-mlp-train-recall}{{29}{14}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Comparative consideration}{14}{}\protected@file@percent }
-\newlabel{subsubsec:q3-comparative-consideration}{{\mbox  {V-C}}{14}}
 \citation{b18}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Q5-Bert embeddings vs. Raw representations}{12}{}\protected@file@percent }
 \citation{b19}
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Q5-Bert embeddings vs. Raw representations}{15}{}\protected@file@percent }
-\newlabel{eq:param_count_fc}{{6}{15}}
-\newlabel{eq:param_count_mlp_char}{{7}{15}}
-\newlabel{eq:param_count_mlp_bert}{{8}{15}}
+\newlabel{eq:param_count_fc}{{6}{13}}
+\newlabel{eq:param_count_mlp_char}{{7}{13}}
+\newlabel{eq:param_count_mlp_bert}{{8}{13}}
 \citation{b_bert}
 \citation{b_att}
 \citation{b_bert}
-\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Test-set comparison between the 12 classical pipelines (Q0--Q1) and the 16 MLP models (Q2). Models are ranked by Macro-F1 (descending). Best overall, best classical, and best MLP are highlighted in bold.\relax }}{16}{}\protected@file@percent }
-\newlabel{tab:q3-classical-vs-mlp}{{I}{16}}
-\@writefile{toc}{\contentsline {section}{\numberline {VII}Q6-BERT Architecture and Theoretical Framework}{16}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-A}}Model Architecture}{16}{}\protected@file@percent }
 \citation{b_bert}
 \citation{b_bert}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-A}1}Multi-Head Self-Attention}{17}{}\protected@file@percent }
-\newlabel{eq:attention}{{9}{17}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-A}2}Feed-Forward Network and GELU Activation}{17}{}\protected@file@percent }
-\newlabel{eq:ffn}{{10}{17}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-A}3}Residual Connections and Normalization}{17}{}\protected@file@percent }
-\newlabel{eq:addnorm}{{11}{17}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-B}}Input Representation}{17}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-B}1}WordPiece Tokenization}{17}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-B}2}Embedding Summation}{17}{}\protected@file@percent }
-\newlabel{eq:embeddings}{{12}{17}}
-\@writefile{lof}{\contentsline {figure}{\numberline {30}{\ignorespaces BERT input representation. The input embeddings are the sum of the token embeddings, the segmentation embeddings, and the position embeddings \cite  {b_bert}.\relax }}{17}{}\protected@file@percent }
-\newlabel{fig:bert_input}{{30}{17}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-C}}Pre-training Objectives}{17}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-C}1}Masked Language Model (MLM)}{17}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Q6-BERT Architecture and Theoretical Framework}{14}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Model Architecture}{14}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {24}{\ignorespaces Differences in pre-training model architectures. BERT uses a bidirectional Transformer, distinguishing it from OpenAI GPT and ELMo \cite  {b_bert}.\relax }}{14}{}\protected@file@percent }
+\newlabel{fig:bert_arch}{{24}{14}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-A}1}Multi-Head Self-Attention}{14}{}\protected@file@percent }
+\newlabel{eq:attention}{{9}{14}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-A}2}Feed-Forward Network and GELU Activation}{14}{}\protected@file@percent }
+\newlabel{eq:ffn}{{10}{14}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-A}3}Residual Connections and Normalization}{14}{}\protected@file@percent }
+\newlabel{eq:addnorm}{{11}{14}}
 \citation{b_bert}
 \citation{b_bert}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-C}2}Next Sentence Prediction (NSP)}{18}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-D}}Application Strategies}{18}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {31}{\ignorespaces Feature-based approach results on CoNLL-2003 NER. Concatenating the last 4 hidden layers yields performance comparable to fine-tuning \cite  {b_bert}.\relax }}{18}{}\protected@file@percent }
-\newlabel{fig:bert_table}{{31}{18}}
-\@writefile{toc}{\contentsline {section}{\numberline {VIII}Conclusion}{18}{}\protected@file@percent }
+\citation{b_bert}
+\citation{b_bert}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Input Representation}{15}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-B}1}WordPiece Tokenization}{15}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-B}2}Embedding Summation}{15}{}\protected@file@percent }
+\newlabel{eq:embeddings}{{12}{15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {25}{\ignorespaces BERT input representation. The input embeddings are the sum of the token embeddings, the segmentation embeddings, and the position embeddings \cite  {b_bert}.\relax }}{15}{}\protected@file@percent }
+\newlabel{fig:bert_input}{{25}{15}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Pre-training Objectives}{15}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-C}1}Masked Language Model (MLM)}{15}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VI-C}2}Next Sentence Prediction (NSP)}{15}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Application Strategies}{15}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {26}{\ignorespaces Feature-based approach results on CoNLL-2003 NER. Concatenating the last 4 hidden layers yields performance comparable to fine-tuning \cite  {b_bert}.\relax }}{15}{}\protected@file@percent }
+\newlabel{fig:bert_table}{{26}{15}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{15}{}\protected@file@percent }
 \bibcite{b1}{1}
 \bibcite{b2}{2}
 \bibcite{b3}{3}
@@ -194,6 +170,7 @@
 \bibcite{b12}{12}
 \bibcite{b13}{13}
 \bibcite{b14}{14}
+\@writefile{toc}{\contentsline {section}{References}{16}{}\protected@file@percent }
 \bibcite{b15}{15}
 \bibcite{b16}{16}
 \bibcite{b17}{17}
@@ -201,5 +178,4 @@
 \bibcite{b19}{19}
 \bibcite{b_bert}{20}
 \bibcite{b_att}{21}
-\@writefile{toc}{\contentsline {section}{References}{19}{}\protected@file@percent }
-\gdef \@abspage@last{19}
+\gdef \@abspage@last{17}

@@ -346,8 +346,6 @@ Additionally, when using BERT embeddings, the transformations applied during the
 
 For training, cross-entropy loss is defined as the optimization criterion. In addition, a maximum of 50 training epochs is proposed, with a fast stopping criterion of $1\times 10^{-4}$, and a learning rate of $1\times 10^{-4}$ is used. The Adam optimizer is defined and applied to all trained networks. It is also important to highlight that the training algorithm used for these MLPs is the same as the one employed for training the other models, which allows their performance to be compared under consistent training conditions. The results of all pipelines described in this section are analyzed in the following section.
 
-\input{sections/Q3}
-
 \section{Q5-Bert embeddings vs. Raw representations}
 
 Although the difference implied by representing raw text through any of the classic frequency-based vectorization methods and the use of BERT embeddings has already been addressed in the MLP training section, it is appropriate to discuss in greater detail the difference between these two forms of numerical representation for textual elements: approaches based on frequency occurrence counts and transformer-based representations.
@@ -408,6 +406,12 @@ Devlin et al. define two primary model sizes to evaluate the effect of model cap
     \item \textbf{BERT\textsubscript{LARGE}:} A significantly deeper and wider network with $L=24$, $H=1024$, and $A=16$, resulting in approximately 340 million parameters.
 \end{itemize}
 
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q6/bert_arch_comparison.jpg}
+  \caption{Differences in pre-training model architectures. BERT uses a bidirectional Transformer, distinguishing it from OpenAI GPT and ELMo \cite{b_bert}.}
+  \label{fig:bert_arch}
+\end{figure}
 Within each layer, the architecture employs two primary sub-layers: a Multi-Head Self-Attention mechanism and a Position-wise Feed-Forward Network. Crucially, a residual connection is employed around each of these two sub-layers, followed by layer normalization.
 
 \subsubsection{Multi-Head Self-Attention}
@@ -461,7 +465,7 @@ The input representation for a given token is constructed by summing three disti
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=\linewidth]{images/Q6/figura2.jpg}
+  \includegraphics[width=\linewidth]{images/Q6/bert_input_rep.jpg}
   \caption{BERT input representation. The input embeddings are the sum of the token embeddings, the segmentation embeddings, and the position embeddings \cite{b_bert}.}
   \label{fig:bert_input}
 \end{figure}
@@ -489,7 +493,7 @@ As demonstrated in the ablation studies by Devlin et al., BERT can be applied to
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.85\linewidth]{images/Q6/tabla1.jpg}
+  \includegraphics[width=0.85\linewidth]{images/Q6/bert_ner_table.jpg}
   \caption{Feature-based approach results on CoNLL-2003 NER. Concatenating the last 4 hidden layers yields performance comparable to fine-tuning \cite{b_bert}.}
   \label{fig:bert_table}
 \end{figure}

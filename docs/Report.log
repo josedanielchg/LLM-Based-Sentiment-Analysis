@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.1.19)  19 JAN 2026 20:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.1.19)  19 JAN 2026 20:46
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -492,264 +492,237 @@ File: omsptm.fd
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 219.
- [10] [11] (./sections/Q3.tex [12]
-<images/Q3/mlp_test_f1_macro_barh_hue.png, id=106, 860.7357pt x 425.4294pt>
-File: images/Q3/mlp_test_f1_macro_barh_hue.png Graphic file (type png)
-<use images/Q3/mlp_test_f1_macro_barh_hue.png>
-Package pdftex.def Info: images/Q3/mlp_test_f1_macro_barh_hue.png  used on input line 13.
-(pdftex.def)             Requested size: 252.0pt x 124.55281pt.
-<images/Q3/mlp_test_recall_macro_barh_hue.png, id=107, 860.7357pt x 425.4294pt>
-File: images/Q3/mlp_test_recall_macro_barh_hue.png Graphic file (type png)
-<use images/Q3/mlp_test_recall_macro_barh_hue.png>
-Package pdftex.def Info: images/Q3/mlp_test_recall_macro_barh_hue.png  used on input line 20.
-(pdftex.def)             Requested size: 252.0pt x 124.55281pt.
-<images/Q3/mlp_test_accuracy_barh_hue.png, id=108, 860.7357pt x 425.1885pt>
-File: images/Q3/mlp_test_accuracy_barh_hue.png Graphic file (type png)
-<use images/Q3/mlp_test_accuracy_barh_hue.png>
-Package pdftex.def Info: images/Q3/mlp_test_accuracy_barh_hue.png  used on input line 27.
-(pdftex.def)             Requested size: 252.0pt x 124.48228pt.
-<images/Q3/mlp_train_accuracy_barh_hue.png, id=109, 860.7357pt x 425.4294pt>
-File: images/Q3/mlp_train_accuracy_barh_hue.png Graphic file (type png)
-<use images/Q3/mlp_train_accuracy_barh_hue.png>
-Package pdftex.def Info: images/Q3/mlp_train_accuracy_barh_hue.png  used on input line 64.
-(pdftex.def)             Requested size: 252.0pt x 124.55281pt.
- [13 <./images/Q3/mlp_test_f1_macro_barh_hue.png> <./images/Q3/mlp_test_recall_macro_barh_hue.png> <./images/Q3/mlp_test_accuracy_barh_hue.png>]
-<images/Q3/mlp_train_f1_macro_barh_hue.png, id=117, 860.7357pt x 425.4294pt>
-File: images/Q3/mlp_train_f1_macro_barh_hue.png Graphic file (type png)
-<use images/Q3/mlp_train_f1_macro_barh_hue.png>
-Package pdftex.def Info: images/Q3/mlp_train_f1_macro_barh_hue.png  used on input line 71.
-(pdftex.def)             Requested size: 252.0pt x 124.55281pt.
-<images/Q3/mlp_train_recall_macro_barh_hue.png, id=118, 860.7357pt x 425.4294pt>
-File: images/Q3/mlp_train_recall_macro_barh_hue.png Graphic file (type png)
-<use images/Q3/mlp_train_recall_macro_barh_hue.png>
-Package pdftex.def Info: images/Q3/mlp_train_recall_macro_barh_hue.png  used on input line 78.
-(pdftex.def)             Requested size: 252.0pt x 124.55281pt.
- [14 <./images/Q3/mlp_train_accuracy_barh_hue.png> <./images/Q3/mlp_train_f1_macro_barh_hue.png> <./images/Q3/mlp_train_recall_macro_barh_hue.png>]) [15]
-Underfull \vbox (badness 1803) has occurred while \output is active []
+ [10] [11] [12]
+Underfull \vbox (badness 2012) has occurred while \output is active []
 
- [16]
-Underfull \hbox (badness 4859) in paragraph at lines 458--459
+ [13]
+<images/Q6/bert_arch_comparison.jpg, id=110, 485.56406pt x 111.41624pt>
+File: images/Q6/bert_arch_comparison.jpg Graphic file (type jpg)
+<use images/Q6/bert_arch_comparison.jpg>
+Package pdftex.def Info: images/Q6/bert_arch_comparison.jpg  used on input line 411.
+(pdftex.def)             Requested size: 252.0pt x 57.82286pt.
+ [14 <./images/Q6/bert_arch_comparison.jpg>]
+Underfull \hbox (badness 4859) in paragraph at lines 462--463
 []\OT1/ptm/b/n/10 Segment Em-bed-dings: \OT1/ptm/m/n/10 Learned vec-tors in-di-cat-ing
  []
 
 
-Underfull \hbox (badness 2020) in paragraph at lines 459--460
+Underfull \hbox (badness 2020) in paragraph at lines 463--464
 \OT1/ptm/m/n/10 so-lute po-si-tional in-for-ma-tion, nec-es-sary due to the
  []
 
-<images/Q6/figura2.jpg, id=131, 395.22656pt x 119.69719pt>
-File: images/Q6/figura2.jpg Graphic file (type jpg)
-<use images/Q6/figura2.jpg>
-Package pdftex.def Info: images/Q6/figura2.jpg  used on input line 464.
+<images/Q6/bert_input_rep.jpg, id=114, 395.22656pt x 119.69719pt>
+File: images/Q6/bert_input_rep.jpg Graphic file (type jpg)
+<use images/Q6/bert_input_rep.jpg>
+Package pdftex.def Info: images/Q6/bert_input_rep.jpg  used on input line 468.
 (pdftex.def)             Requested size: 252.0pt x 76.321pt.
-[17 <./images/Q6/figura2.jpg>]
-<images/Q6/tabla1.jpg, id=136, 220.57407pt x 184.43906pt>
-File: images/Q6/tabla1.jpg Graphic file (type jpg)
-<use images/Q6/tabla1.jpg>
-Package pdftex.def Info: images/Q6/tabla1.jpg  used on input line 492.
+<images/Q6/bert_ner_table.jpg, id=115, 220.57407pt x 184.43906pt>
+File: images/Q6/bert_ner_table.jpg Graphic file (type jpg)
+<use images/Q6/bert_ner_table.jpg>
+Package pdftex.def Info: images/Q6/bert_ner_table.jpg  used on input line 496.
 (pdftex.def)             Requested size: 214.20154pt x 179.11673pt.
- [18 <./images/Q6/tabla1.jpg>]
-Underfull \hbox (badness 1430) in paragraph at lines 513--514
+[15 <./images/Q6/bert_input_rep.jpg> <./images/Q6/bert_ner_table.jpg>]
+Underfull \hbox (badness 1430) in paragraph at lines 517--518
 []\OT1/ptm/m/n/8 T. Finn and A. Downie, ``How can sen-ti-ment anal-y-sis be used
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 519--520
+Underfull \hbox (badness 10000) in paragraph at lines 523--524
 []\OT1/ptm/m/n/8 The NLTK Project, ``Sam-ple us-age for cor-pus,'' \OT1/ptm/m/it/8 NLTK
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 519--520
+Underfull \hbox (badness 10000) in paragraph at lines 523--524
 \OT1/ptm/m/it/8 Doc-u-men-ta-tion\OT1/ptm/m/n/8 , ac-cessed Jan. 18, 2026. [On-line]. Avail-able:
  []
 
 
-Underfull \hbox (badness 1533) in paragraph at lines 521--522
+Underfull \hbox (badness 1533) in paragraph at lines 525--526
 \OT1/ptm/m/it/8 ta-tion\OT1/ptm/m/n/8 , ac-cessed Jan. 18, 2026. [On-line]. Avail-able: https://scikit-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 523--524
+Underfull \hbox (badness 10000) in paragraph at lines 527--528
 \OT1/ptm/m/it/8 scikit-learn Doc-u-men-ta-tion\OT1/ptm/m/n/8 , ac-cessed Jan.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 523--524
+Underfull \hbox (badness 10000) in paragraph at lines 527--528
 \OT1/ptm/m/n/8 18, 2026. [On-line]. Avail-able: https://scikit-
  []
 
 
-Overfull \hbox (44.77293pt too wide) in paragraph at lines 523--524
+Overfull \hbox (44.77293pt too wide) in paragraph at lines 527--528
 \OT1/ptm/m/n/8 learn.org/stable/modules/generated/sklearn.feature[]extraction.text.TfidfVectorizer.html 
  []
 
 
-Underfull \hbox (badness 5504) in paragraph at lines 525--526
+Underfull \hbox (badness 5504) in paragraph at lines 529--530
 []\OT1/ptm/m/n/8 F. Se-bas-tiani, ``Ma-chine Learn-ing in Au-to-mated Text Cat-e-go-
  []
 
 
-Underfull \hbox (badness 6808) in paragraph at lines 525--526
+Underfull \hbox (badness 6808) in paragraph at lines 529--530
 \OT1/ptm/m/n/8 riza-tion,'' \OT1/ptm/m/it/8 ACM Com-put-ing Sur-veys\OT1/ptm/m/n/8 , vol. 34, no. 1, pp. 1--
  []
 
 
-Underfull \hbox (badness 2035) in paragraph at lines 525--526
+Underfull \hbox (badness 2035) in paragraph at lines 529--530
 \OT1/ptm/m/n/8 47, Mar. 2002, doi: 10.1145/505282.505283. [On-line]. Avail-able:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 527--528
+Underfull \hbox (badness 10000) in paragraph at lines 531--532
 []\OT1/ptm/m/n/8 scikit-learn de-vel-op-ers, ``sklearn.naive[]bayes.MultinomialNB,''
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 527--528
+Underfull \hbox (badness 10000) in paragraph at lines 531--532
 \OT1/ptm/m/it/8 scikit-learn Doc-u-men-ta-tion\OT1/ptm/m/n/8 . [On-line]. Avail-able: https://scikit-
  []
 
 
-Overfull \hbox (16.72516pt too wide) in paragraph at lines 527--528
+Overfull \hbox (16.72516pt too wide) in paragraph at lines 531--532
 \OT1/ptm/m/n/8 learn.org/stable/modules/generated/sklearn.naive[]bayes.MultinomialNB.html.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 529--530
+Underfull \hbox (badness 10000) in paragraph at lines 533--534
 []\OT1/ptm/m/n/8 scikit-learn de-vel-op-ers, ``sklearn.linear[]model.LogisticRegression,''
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 529--530
+Underfull \hbox (badness 10000) in paragraph at lines 533--534
 \OT1/ptm/m/it/8 scikit-learn Doc-u-men-ta-tion\OT1/ptm/m/n/8 . [On-line]. Avail-able: https://scikit-
  []
 
 
-Overfull \hbox (30.25291pt too wide) in paragraph at lines 529--530
+Overfull \hbox (30.25291pt too wide) in paragraph at lines 533--534
 \OT1/ptm/m/n/8 learn.org/stable/modules/generated/sklearn.linear[]model.LogisticRegression.html.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 533--534
+Underfull \hbox (badness 10000) in paragraph at lines 537--538
 []\OT1/ptm/m/n/8 scikit-learn de-vel-op-ers, ``sklearn.calibration.CalibratedClassifierCV,''
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 533--534
+Underfull \hbox (badness 10000) in paragraph at lines 537--538
 \OT1/ptm/m/it/8 scikit-learn Doc-u-men-ta-tion\OT1/ptm/m/n/8 , ac-cessed Jan.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 533--534
+Underfull \hbox (badness 10000) in paragraph at lines 537--538
 \OT1/ptm/m/n/8 18, 2026. [On-line]. Avail-able: https://scikit-
  []
 
 
-Overfull \hbox (32.22859pt too wide) in paragraph at lines 533--534
+Overfull \hbox (32.22859pt too wide) in paragraph at lines 537--538
 \OT1/ptm/m/n/8 learn.org/stable/modules/generated/sklearn.calibration.CalibratedClassifierCV.html 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 535--536
+Underfull \hbox (badness 10000) in paragraph at lines 539--540
 []\OT1/ptm/m/n/8 scikit-learn de-vel-op-ers, ``sklearn.ensemble.RandomForestClassifier,''
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 535--536
+Underfull \hbox (badness 10000) in paragraph at lines 539--540
 \OT1/ptm/m/it/8 scikit-learn Doc-u-men-ta-tion\OT1/ptm/m/n/8 , ac-cessed Jan.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 535--536
+Underfull \hbox (badness 10000) in paragraph at lines 539--540
 \OT1/ptm/m/n/8 18, 2026. [On-line]. Avail-able: https://scikit-
  []
 
 
-Overfull \hbox (31.37286pt too wide) in paragraph at lines 535--536
+Overfull \hbox (31.37286pt too wide) in paragraph at lines 539--540
 \OT1/ptm/m/n/8 learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 537--538
+Underfull \hbox (badness 10000) in paragraph at lines 541--542
 []\OT1/ptm/m/n/8 SciPy de-vel-op-ers, ``scipy.sparse.csr[]matrix,''
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 537--538
+Underfull \hbox (badness 10000) in paragraph at lines 541--542
 \OT1/ptm/m/it/8 SciPy Doc-u-men-ta-tion\OT1/ptm/m/n/8 . [On-line]. Avail-able:
  []
 
 
-Overfull \hbox (27.525pt too wide) in paragraph at lines 537--538
+Overfull \hbox (27.525pt too wide) in paragraph at lines 541--542
 \OT1/ptm/m/n/8 https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr[]matrix.html.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 539--540
+Underfull \hbox (badness 10000) in paragraph at lines 543--544
 []\OT1/ptm/m/n/8 PyTorch con-trib-u-tors, ``Data Load-ing and Pro-cess-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 539--540
+Underfull \hbox (badness 10000) in paragraph at lines 543--544
 \OT1/ptm/m/n/8 ing Tu-to-rial,'' \OT1/ptm/m/it/8 Py-Torch Tu-to-ri-als\OT1/ptm/m/n/8 . [On-line]. Avail-able:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 539--540
+Underfull \hbox (badness 10000) in paragraph at lines 543--544
 \OT1/ptm/m/n/8 https://docs.pytorch.org/tutorials/beginner/data[]loading[]tutorial.html.
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 543--544
+[16]
+Underfull \hbox (badness 10000) in paragraph at lines 547--548
 []\OT1/ptm/m/n/8 scikit-learn de-vel-op-ers, ``sklearn.preprocessing.StandardScaler,''
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 543--544
+Underfull \hbox (badness 10000) in paragraph at lines 547--548
 \OT1/ptm/m/it/8 scikit-learn Doc-u-men-ta-tion\OT1/ptm/m/n/8 , ac-cessed Jan.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 543--544
+Underfull \hbox (badness 10000) in paragraph at lines 547--548
 \OT1/ptm/m/n/8 18, 2026. [On-line]. Avail-able: https://scikit-
  []
 
 
-Overfull \hbox (16.80519pt too wide) in paragraph at lines 543--544
+Overfull \hbox (16.80519pt too wide) in paragraph at lines 547--548
 \OT1/ptm/m/n/8 learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html 
  []
 
 
-Underfull \hbox (badness 4726) in paragraph at lines 545--546
+Underfull \hbox (badness 4726) in paragraph at lines 549--550
 []\OT1/ptm/m/n/8 Sutriawan, Supri-adi Rus-tad, Gu-ruh Fa-jar Shidik, and Pu-jiono,
  []
 
 
-Underfull \hbox (badness 4391) in paragraph at lines 545--546
+Underfull \hbox (badness 4391) in paragraph at lines 549--550
 \OT1/ptm/m/n/8 ``Per-for-mance Eval-u-a-tion of Text Em-bed-ding Mod-els for Am-
  []
 
 
-Underfull \hbox (badness 2762) in paragraph at lines 545--546
+Underfull \hbox (badness 2762) in paragraph at lines 549--550
 \OT1/ptm/m/n/8 bi-gu-ity Clas-si-fi-ca-tion in In-done-sian News Cor-pus: A Com-par-a-
  []
 
 
-Underfull \hbox (badness 3291) in paragraph at lines 545--546
+Underfull \hbox (badness 3291) in paragraph at lines 549--550
 \OT1/ptm/m/n/8 tive Study of TF-IDF, Word2Vec, Fast-Text, BERT, and GPT,''
  []
 
 
-Underfull \hbox (badness 3849) in paragraph at lines 545--546
+Underfull \hbox (badness 3849) in paragraph at lines 549--550
 \OT1/ptm/m/n/8 1482, June 2025, doi: 10.18280/isi.300606. [On-line]. Avail-able:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 549--550
+Underfull \hbox (badness 10000) in paragraph at lines 553--554
 []\OT1/ptm/m/n/8 PyTorch con-trib-u-tors, ``torch.nn.Linear,'' \OT1/ptm/m/it/8 Py-Torch Doc-u-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 549--550
+Underfull \hbox (badness 10000) in paragraph at lines 553--554
 \OT1/ptm/m/it/8 men-ta-tion\OT1/ptm/m/n/8 , ac-cessed Jan. 18, 2026. [On-line]. Avail-able:
  []
 
@@ -764,20 +737,22 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[19] (./Report.aux) ) 
+[17
+
+] (./Report.aux) ) 
 Here is how much of TeX's memory you used:
- 5988 strings out of 480247
- 105968 string characters out of 5896106
- 411065 words of memory out of 5000000
- 23832 multiletter control sequences out of 15000+600000
+ 5930 strings out of 480247
+ 103983 string characters out of 5896106
+ 399910 words of memory out of 5000000
+ 23783 multiletter control sequences out of 15000+600000
  513336 words of font info for 114 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  69i,11n,79p,1725b,363s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Report.pdf (19 pages, 5102312 bytes).
+Output written on Report.pdf (17 pages, 3174989 bytes).
 PDF statistics:
- 204 PDF objects out of 1000 (max. 8388607)
- 88 compressed objects within 1 object stream
+ 186 PDF objects out of 1000 (max. 8388607)
+ 83 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 171 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 146 words of extra memory for PDF output out of 10000 (max. 10000000)
 
