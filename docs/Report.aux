@@ -50,6 +50,69 @@
 \citation{b12}
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Word count distribution by sentiment}}{4}{}\protected@file@percent }
 \newlabel{fig:q0-wordcount}{{6}{4}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Q1-Classification with Classical Models and Performance Analysis}{5}{}\protected@file@percent }
+\newlabel{sec:q1}{{III}{5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Training time}{5}{}\protected@file@percent }
+\newlabel{subsec:q1-time}{{\mbox  {III-A}}{5}{}{}{}}
+\newlabel{subsubsec:q1-ttotal}{{\mbox  {III-A}1}{5}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-A}1}Total time estimate (sequential compute)}{5}{}\protected@file@percent }
+\newlabel{eq:q1-e1}{{4}{5}{}{}{}}
+\newlabel{subsubsec:q1-twall}{{\mbox  {III-A}2}{5}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-A}2}Wall-clock time with parallelization}{5}{}\protected@file@percent }
+\newlabel{eq:q1-e2}{{5}{5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Test-set performance}{5}{}\protected@file@percent }
+\newlabel{subsec:q1-test}{{\mbox  {III-B}}{5}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Test comparison --- Macro-F1 (hue = vectorization).}}{5}{}\protected@file@percent }
+\newlabel{fig:q1-f1}{{7}{5}{}{}{}}
+\newlabel{subsubsec:q1-vectorization}{{\mbox  {III-B}1}{5}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}1}Impact of the vectorization method}{5}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Test comparison --- Macro-Recall (hue = vectorization).}}{6}{}\protected@file@percent }
+\newlabel{fig:q1-f2}{{8}{6}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Test comparison --- Accuracy (hue = vectorization).}}{6}{}\protected@file@percent }
+\newlabel{fig:q1-f3}{{9}{6}{}{}{}}
+\newlabel{subsubsec:q1-tradeoffs}{{\mbox  {III-B}2}{6}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}2}Model comparison and trade-offs}{6}{}\protected@file@percent }
+\newlabel{subsubsec:q1-cm}{{\mbox  {III-B}3}{6}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}3}Confusion matrix analysis (TF--IDF char)}{6}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Confusion matrix of \texttt  {best\_\_tfidf\_char\_\_svm}.}}{6}{}\protected@file@percent }
+\newlabel{fig:q1-cm-svm}{{10}{6}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Confusion matrix of \texttt  {best\_\_tfidf\_char\_\_lr}.}}{6}{}\protected@file@percent }
+\newlabel{fig:q1-cm-lr}{{11}{6}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {III-B}3a}General pattern: the ``neutral'' class is the main source of ambiguity.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {III-B}3b}Good sign: low direct confusion between ``negative'' and ``positive''.}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {III-B}3c}Subtle differences between SVM and Logistic Regression.}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Top-20 and Bottom-20 character n-grams per class (LR vs.\ SVM)}{7}{}\protected@file@percent }
+\newlabel{subsec:q1-ngrams}{{\mbox  {III-C}}{7}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}1}Positive class}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Positive class: Top-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt  {char\_wb}).}}{7}{}\protected@file@percent }
+\newlabel{fig:q1-pos-lr-top}{{12}{7}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Positive class: Top-20 character n-grams (Linear SVM) under TF--IDF char (\texttt  {char\_wb}).}}{7}{}\protected@file@percent }
+\newlabel{fig:q1-pos-svm-top}{{13}{7}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}2}Negative class}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Positive class: Bottom-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt  {char\_wb}).}}{8}{}\protected@file@percent }
+\newlabel{fig:q1-pos-lr-bottom}{{14}{8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Positive class: Bottom-20 character n-grams (Linear SVM) under TF--IDF char (\texttt  {char\_wb}).}}{8}{}\protected@file@percent }
+\newlabel{fig:q1-pos-svm-bottom}{{15}{8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Negative class: Top-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt  {char\_wb}).}}{8}{}\protected@file@percent }
+\newlabel{fig:q1-neg-lr-top}{{16}{8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Negative class: Top-20 character n-grams (Linear SVM) under TF--IDF char (\texttt  {char\_wb}).}}{8}{}\protected@file@percent }
+\newlabel{fig:q1-neg-svm-top}{{17}{8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Negative class: Bottom-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt  {char\_wb}).}}{8}{}\protected@file@percent }
+\newlabel{fig:q1-neg-lr-bottom}{{18}{8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Negative class: Bottom-20 character n-grams (Linear SVM) under TF--IDF char (\texttt  {char\_wb}).}}{8}{}\protected@file@percent }
+\newlabel{fig:q1-neg-svm-bottom}{{19}{8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Neutral class: Top-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt  {char\_wb}).}}{9}{}\protected@file@percent }
+\newlabel{fig:q1-neu-lr-top}{{20}{9}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces Neutral class: Top-20 character n-grams (Linear SVM) under TF--IDF char (\texttt  {char\_wb}).}}{9}{}\protected@file@percent }
+\newlabel{fig:q1-neu-svm-top}{{21}{9}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}3}Neutral class}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Synthesis and practical considerations}{9}{}\protected@file@percent }
+\newlabel{subsec:q1-synthesis}{{\mbox  {III-D}}{9}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {22}{\ignorespaces Neutral class: Bottom-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt  {char\_wb}).}}{9}{}\protected@file@percent }
+\newlabel{fig:q1-neu-lr-bottom}{{22}{9}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {23}{\ignorespaces Neutral class: Bottom-20 character n-grams (Linear SVM) under TF--IDF char (\texttt  {char\_wb}).}}{9}{}\protected@file@percent }
+\newlabel{fig:q1-neu-svm-bottom}{{23}{9}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Q2-MLP Architectures for Short-Text Sentiment Classification}{9}{}\protected@file@percent }
 \citation{b13}
 \citation{b14}
 \bibcite{b1}{1}
@@ -60,12 +123,11 @@
 \bibcite{b6}{6}
 \bibcite{b7}{7}
 \bibcite{b8}{8}
-\@writefile{toc}{\contentsline {section}{\numberline {III}Q2-MLP Architectures for Short-Text Sentiment Classification}{5}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{References}{5}{}\protected@file@percent }
 \bibcite{b9}{9}
 \bibcite{b10}{10}
 \bibcite{b11}{11}
 \bibcite{b12}{12}
 \bibcite{b13}{13}
 \bibcite{b14}{14}
-\gdef \@abspage@last{6}
+\@writefile{toc}{\contentsline {section}{References}{10}{}\protected@file@percent }
+\gdef \@abspage@last{10}

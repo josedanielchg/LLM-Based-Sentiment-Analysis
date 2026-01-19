@@ -1,0 +1,261 @@
+\section{Q1-Classification with Classical Models and Performance Analysis}
+\label{sec:q1}
+
+A total of 12 experimental configurations were trained (3 vectorization schemes $\times$ 4 models). The goal of this stage is to compare the performance of these combinations on the test set and to define a strong classical baseline, which will later serve as a reference point against embedding-based methods and BERT-like models.
+
+The reported metrics are Accuracy, Macro-Recall, and Macro-F1. Macro metrics are particularly relevant because they evaluate performance more evenly across classes, reducing the risk that a dominant class drives the global evaluation.
+
+\subsection{Training time}
+\label{subsec:q1-time}
+
+Each experiment trained with \texttt{GridSearchCV} produces a CSV file containing the full detail of all evaluated combinations, including hyperparameters for both the vectorizer and the classifier. These CSV files enable a systematic analysis of configuration changes and an informed selection of the final best-performing pipeline.
+
+In these files, the \texttt{mean\_fit\_time} field represents the average training time per fold for each evaluated configuration. Using this value, it is possible to estimate the overall compute time associated with hyperparameter search.
+
+\subsubsection{Total time estimate (sequential compute)}
+\label{subsubsec:q1-ttotal}
+
+The sequential total-time estimate is computed as the sum of the average training time per fold for each candidate configuration, multiplied by the number of cross-validation folds:
+\begin{equation}
+\label{eq:q1-e1}
+T_{\text{total}} \approx \sum_{i=1}^{n_{\text{candidates}}} \left(\texttt{mean\_fit\_time}_i \times n_{\text{splits}}\right),
+\qquad
+n_{\text{splits}} = 5.
+\end{equation}
+
+Here, $n_{\text{candidates}}$ corresponds to the number of rows in the CSV, i.e., the number of hyperparameter combinations evaluated, being the total accumulated:
+\begin{itemize}
+    \item $n_{\text{candidates}} = 968$
+    \item $T_{\text{total}} \approx 287{,}978.76~\text{s}$
+\end{itemize}
+
+\subsubsection{Wall-clock time with parallelization}
+\label{subsubsec:q1-twall}
+
+The value above corresponds to a theoretical sequential compute time (i.e., a single-thread estimate). However, since parallelization was enabled with \texttt{n\_jobs=-1}, the workload is distributed across multiple CPU cores. Therefore, an approximate wall-clock time can be estimated as:
+\begin{equation}
+\label{eq:q1-e2}
+T_{\text{wall}} \approx \frac{T_{\text{total}}}{n_{\text{jobs}}}.
+\end{equation}
+
+Assuming 8 effective cores, the wall-clock estimate becomes:
+\[
+T_{\text{wall}} \approx \frac{287{,}978.76}{8} \approx 35{,}997.35~\text{s} \approx 10.00~\text{h}.
+\]
+
+\subsection{Test-set performance}
+\label{subsec:q1-test}
+
+Test performance is summarized with three comparative plots: Macro-F1, Macro-Recall, and Accuracy, referenced as Fig.~\ref{fig:q1-f1}, Fig.~\ref{fig:q1-f2}, and Fig.~\ref{fig:q1-f3}, respectively. These plots show, for each classifier, the performance obtained under each vectorization method, allowing robust trends to be identified immediately.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/barh_models_hue_vectorization_f1_macro.png}
+  \caption{Test comparison --- Macro-F1 (hue = vectorization).}
+  \label{fig:q1-f1}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/barh_models_hue_vectorization_recall_macro.png}
+  \caption{Test comparison --- Macro-Recall (hue = vectorization).}
+  \label{fig:q1-f2}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/barh_models_hue_vectorization_accuracy.png}
+  \caption{Test comparison --- Accuracy (hue = vectorization).}
+  \label{fig:q1-f3}
+\end{figure}
+
+\subsubsection{Impact of the vectorization method}
+\label{subsubsec:q1-vectorization}
+
+Overall, the figures indicate that character-level TF--IDF (TF--IDF char) tends to yield the best values across all three metrics. This behavior is consistent with the nature of the dataset (short, informal tweets), where character-based modeling captures important sub-lexical patterns such as spelling errors, morphological variations, elongations (e.g., ``soooo good''), hashtags, abbreviations, and prefix/suffix cues.
+
+In contrast, BoW often exhibits the lowest performance because it relies on raw counts without weighting terms by their global relevance. Word-level TF--IDF improves upon BoW, but remains less robust to orthographic noise and non-standard language usage compared to character n-grams.
+
+\subsubsection{Model comparison and trade-offs}
+\label{subsubsec:q1-tradeoffs}
+
+Among classifiers, Linear SVM and Logistic Regression stand out for their consistency and stability, especially when combined with TF--IDF (particularly TF--IDF char). This is expected because BoW/TF--IDF representations produce very high-dimensional and sparse matrices, a regime where linear models are typically both effective and computationally efficient.
+
+Although Random Forest achieves very competitive results (and can even reach the best score), several drawbacks are important in high-dimensional text settings:
+\begin{itemize}
+    \item \textbf{Scalability and computational cost:} training many trees in large TF--IDF spaces increases time and memory usage substantially, especially under \texttt{GridSearchCV}.
+    \item \textbf{Overfitting risk with highly specific features:} TF--IDF char introduces many highly particular n-grams; a non-linear model such as Random Forest may capture accidental training patterns and reduce out-of-domain robustness.
+    \item \textbf{Lower practical interpretability:} while a single tree is interpretable, a forest with many estimators is harder to justify transparently. In contrast, linear models allow a more direct analysis of discriminative signals.
+\end{itemize}
+
+Therefore, even if Random Forest yields a small absolute gain, linear models remain a strong choice due to stability, cost, and methodological clarity.
+
+\subsubsection{Confusion matrix analysis (TF--IDF char)}
+\label{subsubsec:q1-cm}
+
+To analyze the behavior of the best linear models on the test set, we examine the confusion matrices for character-level TF--IDF with Linear SVM and Logistic Regression. This analysis reveals not only how many predictions are correct, but also which types of errors are most frequent and which classes are most often confused in this three-class setting (negative, neutral, positive).
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__svm_confusion_matrix.png}
+  \caption{Confusion matrix of \texttt{best\_\_tfidf\_char\_\_svm}.}
+  \label{fig:q1-cm-svm}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__lr_confusion_matrix.png}
+  \caption{Confusion matrix of \texttt{best\_\_tfidf\_char\_\_lr}.}
+  \label{fig:q1-cm-lr}
+\end{figure}
+
+\paragraph{General pattern: the ``neutral'' class is the main source of ambiguity.}
+In both matrices, most errors concentrate around the neutral class, which is expected in sentiment analysis of short tweets. Many messages contain weak emotional cues, irony, abbreviations, or context-dependent fragments, which makes it difficult to separate neutral from mildly positive or negative texts.
+
+Concretely, the most frequent errors correspond to polarized examples being ``absorbed'' into neutral:
+\begin{itemize}
+    \item Negative $\rightarrow$ Neutral: SVM = 292, Logistic Regression = 307
+    \item Positive $\rightarrow$ Neutral: SVM = 249, Logistic Regression = 274
+\end{itemize}
+
+This pattern suggests that, when polarity is not strongly marked, the model tends to assign neutral as a ``safe'' option. Practically, the hardest boundary is not Negative vs.\ Positive, but rather Neutral vs.\ (Negative/Positive).
+
+\paragraph{Good sign: low direct confusion between ``negative'' and ``positive''.}
+A relevant result is that direct confusion between the polarity extremes (Negative $\leftrightarrow$ Positive) is relatively low compared to confusions toward neutral:
+\begin{itemize}
+    \item Negative $\rightarrow$ Positive: SVM = 47, Logistic Regression = 46
+    \item Positive $\rightarrow$ Negative: SVM = 46, Logistic Regression = 39
+\end{itemize}
+
+This indicates that when strong linguistic markers exist, the models rarely invert sentiment polarity. Thus, clear sentiment signals are captured correctly; the main challenge lies in moderate or ambiguous cases where emotion is weak or context-dependent.
+
+\paragraph{Subtle differences between SVM and Logistic Regression.}
+Although both models achieve very similar overall performance, the matrices suggest slightly different behavior regarding the neutral class:
+\begin{itemize}
+    \item Logistic Regression predicts ``neutral'' more often than SVM (stronger attraction toward neutral).
+    \item This is reflected by slightly higher Negative $\rightarrow$ Neutral and Positive $\rightarrow$ Neutral confusions for LR.
+\end{itemize}
+
+In trade-off terms:
+\begin{itemize}
+    \item SVM tends to keep polarized classes slightly better separated (a small advantage in recovering positives and negatives).
+    \item LR tends to favor the neutral class, which can increase the number of polarized examples classified as neutral.
+\end{itemize}
+
+This is consistent with the nature of the task: neutral is a broad and less semantically-defined class, so small decision-boundary shifts can produce noticeable changes in confusion patterns.
+
+\subsection{Top-20 and Bottom-20 character n-grams per class (LR vs.\ SVM)}
+\label{subsec:q1-ngrams}
+
+\subsubsection{Positive class}
+For the Positive class, the most influential character n-grams are highly consistent across LR and SVM. The Top-20 n-grams are shown in Fig.~\ref{fig:q1-pos-lr-top} and Fig.~\ref{fig:q1-pos-svm-top}. Typical approval fragments such as \emph{love/lov}, \emph{nice}, \emph{good/goo}, \emph{fun}, \emph{best}, \emph{amaz}, \emph{awes}, \emph{yum}, \emph{cool}, and variants of \emph{thank} appear prominently, confirming the benefit of character-level modeling: even incomplete or abbreviated words still preserve strong sentiment cues.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__lr__positive__top_20.png}
+  \caption{Positive class: Top-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-pos-lr-top}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__svm__positive__top_20.png}
+  \caption{Positive class: Top-20 character n-grams (Linear SVM) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-pos-svm-top}
+\end{figure}
+
+Looking at the Bottom-20 (Fig.~\ref{fig:q1-pos-lr-bottom} and Fig.~\ref{fig:q1-pos-svm-bottom}), the strongest penalties for the Positive class are clear negativity markers such as \emph{sad}, \emph{hate/hat}, \emph{bad}, \emph{suck}, and negations (e.g., \emph{no}, \emph{n't}). In practice, predicting ``Positive'' not only requires positive evidence but also the absence of strong negative cues.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__lr__positive__bottom_20.png}
+  \caption{Positive class: Bottom-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-pos-lr-bottom}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__svm__positive__bottom_20.png}
+  \caption{Positive class: Bottom-20 character n-grams (Linear SVM) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-pos-svm-bottom}
+\end{figure}
+
+
+\subsubsection{Negative class}
+For the Negative class, the Top-20 n-grams (Fig.~\ref{fig:q1-neg-lr-top} and Fig.~\ref{fig:q1-neg-svm-top}) reflect discomfort and complaint (\emph{sad}, \emph{hate/hat}, \emph{bad}, \emph{hurt}, \emph{wors}, \emph{sick}, \emph{poor}, and intense fragments such as \emph{uck}). Their presence in both LR and SVM indicates that the negative class is well-defined even when words are abbreviated or incomplete.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__lr__negative__top_20.png}
+  \caption{Negative class: Top-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-neg-lr-top}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__svm__negative__top_20.png}
+  \caption{Negative class: Top-20 character n-grams (Linear SVM) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-neg-svm-top}
+\end{figure}
+
+Conversely, the Bottom-20 (Fig.~\ref{fig:q1-neg-lr-bottom} and Fig.~\ref{fig:q1-neg-svm-bottom}) shows that strong positive cues such as \emph{lov/love}, \emph{thank/than}, \emph{hope}, or \emph{good} penalize the Negative class, demonstrating that the models capture both negative evidence and strong counter-evidence pushing toward Positive.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__lr__negative__bottom_20.png}
+  \caption{Negative class: Bottom-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-neg-lr-bottom}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__svm__negative__bottom_20.png}
+  \caption{Negative class: Bottom-20 character n-grams (Linear SVM) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-neg-svm-bottom}
+\end{figure}
+
+
+\subsubsection{Neutral class}
+Neutral is the most interesting class to interpret. The Top-20 n-grams (Fig.~\ref{fig:q1-neu-lr-top} and Fig.~\ref{fig:q1-neu-svm-top}) tend to be more structural than sentimental (e.g., punctuation such as question marks and discourse connectors), suggesting that the model leverages patterns typical of informative statements or questions.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__lr__neutral__top_20.png}
+  \caption{Neutral class: Top-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-neu-lr-top}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__svm__neutral__top_20.png}
+  \caption{Neutral class: Top-20 character n-grams (Linear SVM) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-neu-svm-top}
+\end{figure}
+
+In the Bottom-20 (Fig.~\ref{fig:q1-neu-lr-bottom} and Fig.~\ref{fig:q1-neu-svm-bottom}), Neutral is penalized when clear polarity signals appear, whether positive (\emph{love/lov}, \emph{good}, \emph{fun}, \emph{nice}) or negative (\emph{sad}, \emph{hate}, etc.). In other words, Neutral is largely defined by the absence of strong sentiment cues, which helps explain why it is often the most difficult class.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__lr__neutral__bottom_20.png}
+  \caption{Neutral class: Bottom-20 character n-grams (Logistic Regression) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-neu-lr-bottom}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q1/best__tfidf_char__svm__neutral__bottom_20.png}
+  \caption{Neutral class: Bottom-20 character n-grams (Linear SVM) under TF--IDF char (\texttt{char\_wb}).}
+  \label{fig:q1-neu-svm-bottom}
+\end{figure}
+
+
+\subsection{Synthesis and practical considerations}
+\label{subsec:q1-synthesis}
+
+After comparing all trained configurations, the most robust and consistent results are obtained with character-level TF--IDF (TF--IDF char) and linear models. The two best approaches (in terms of the balance across Accuracy, Macro-Recall, and Macro-F1) are:
+\begin{itemize}
+    \item Linear SVM + TF--IDF char
+    \item Logistic Regression + TF--IDF char
+\end{itemize}
+
+Although Random Forest can achieve a slightly higher score (see Fig.~\ref{fig:q1-f1}), the metric gap is not large enough to justify its disadvantages in this context (higher computational cost, higher overfitting risk, and lower interpretability). For these reasons, we select TF--IDF char + Linear SVM as the primary classical baseline, with TF--IDF char + Logistic Regression as a very close alternative.
