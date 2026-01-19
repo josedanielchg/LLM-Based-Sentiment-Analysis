@@ -1,7 +1,7 @@
 # Fdb version 4
-["pdflatex"] 1768841581.55991 "/home/santiago/4MI01/LLM-Based-Sentiment-Analysis/docs/Report.tex" "Report.pdf" "Report" 1768841585.83087 0
+["pdflatex"] 1768842769.50804 "/home/santiago/4MI01/LLM-Based-Sentiment-Analysis/docs/Report.tex" "Report.pdf" "Report" 1768842773.79741 0
   "/etc/texmf/web2c/texmf.cnf" 1762418151.39241 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/santiago/4MI01/LLM-Based-Sentiment-Analysis/docs/Report.tex" 1768841575.03718 57244 3d1b1ad08e4bd2d3315fa47e0cf4e1a2 ""
+  "/home/santiago/4MI01/LLM-Based-Sentiment-Analysis/docs/Report.tex" 1768842763.42022 59754 d573110ea57f08561c1df9bac75a91f8 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/courier/pcrr7t.tfm" 1136768653 960 379cc0019370a9e0208a0a3f949f847a ""
@@ -89,8 +89,8 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1762418170.6716 5472669 54eaf61a88b6b7896ebd0dac973cb29c ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1762418224 8214723 66b18d21e2ef1ecd23d5c483e8c60b4e ""
-  "Report.aux" 1768841585.78331 11163 486f58950745577214d900d42bf8724e "pdflatex"
-  "Report.tex" 1768841575.03718 57244 3d1b1ad08e4bd2d3315fa47e0cf4e1a2 ""
+  "Report.aux" 1768842773.75221 11163 6bef8411eceab772da2c159f1915dc0a "pdflatex"
+  "Report.tex" 1768842763.42022 59754 d573110ea57f08561c1df9bac75a91f8 ""
   "images/Q0/Distribution_of_sentiments.png" 1768761693.93553 17539 c8591e12db71f15e3e910483e6c33cb9 ""
   "images/Q0/sentimentbycountry.png" 1768761693.93553 36422 ac1cd48d845c5dac05270d52333eced9 ""
   "images/Q0/sentimentbytypeoftweet.png" 1768761693.93553 22360 8487ae8bf521a7d933ee0315f6a9649d ""
