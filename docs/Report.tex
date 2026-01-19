@@ -394,6 +394,108 @@ Context sensitivity is perhaps the most noticeable and marked difference between
 Although the benefits of using BERT as an embedding extractor become evident, it is essential to emphasize that using BERT as a frozen embedding extractor is not the same as using it adapted to the task, that is, applying fine-tuning that allows the internal representations to align with the classification objective and with the distribution of the training data. This is of critical importance, for example, in short-text analysis or classification tasks such as the one considered here, where adopting a fine-tuning strategy such as LoRA, which is described in Q6, enables obtaining better classifier performance than using BERT only for frozen embedding extraction. It is through these fine-tuning strategies that the main disadvantage of BERT as a frozen embedding extractor can be mitigated with respect to classical vectors, namely that its representation is external to the domain of the training data. In other words, it is sensitive to context by BERT's own definition, but not to parameters such as the frequency of token presence in the training set and other properties that arise because the transformer training is already fixed and, in frozen embedding extraction, no learning takes place.
 
 It is ultimately concluded that BERT is more attractive than classical methods mainly due to its ability to represent semantics and context, which classical methods do not possess. This is therefore associated with a denser input that requires less complexity in the classification MLP. In addition, the possibility of implementing fine-tuning strategies that counteract the domain-agnostic effect of the embedding extractor's pre-training, and that allow the domain of the training dataset to permeate the document embedding representation, can substantially improve model performance. 
+\section{Q6-BERT Architecture and Theoretical Framework}
+
+The Bidirectional Encoder Representations from Transformers (BERT) represents a paradigm shift in language representation learning. Unlike previous models that relied on unidirectional processing (e.g., OpenAI GPT) or shallow concatenation of independent left-to-right and right-to-left models (e.g., ELMo), BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right contexts in all layers \cite{b_bert}.
+
+\subsection{Model Architecture}
+
+BERT’s architecture is a multi-layer bidirectional Transformer encoder based on the original implementation described by Vaswani et al. \cite{b_att}. The model is composed of a stack of $L$ identical layers (Transformer blocks).
+
+Devlin et al. define two primary model sizes to evaluate the effect of model capacity \cite{b_bert}:
+\begin{itemize}
+    \item \textbf{BERT\textsubscript{BASE}:} Defined with $L=12$ layers, a hidden size of $H=768$, and $A=12$ self-attention heads, totaling approximately 110 million parameters. This size was chosen to be comparable to OpenAI GPT for fair evaluation.
+    \item \textbf{BERT\textsubscript{LARGE}:} A significantly deeper and wider network with $L=24$, $H=1024$, and $A=16$, resulting in approximately 340 million parameters.
+\end{itemize}
+
+Within each layer, the architecture employs two primary sub-layers: a Multi-Head Self-Attention mechanism and a Position-wise Feed-Forward Network. Crucially, a residual connection is employed around each of these two sub-layers, followed by layer normalization.
+
+\subsubsection{Multi-Head Self-Attention}
+This mechanism allows the model to jointly attend to information from different representation subspaces at different positions. The attention function is computed on a set of queries ($Q$), keys ($K$), and values ($V$) packed into matrices. The output is a scaled dot-product attention:
+
+\begin{equation}
+\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V,
+\label{eq:attention}
+\end{equation}
+
+where $d_k$ is the dimension of the key vectors, serving as a scaling factor to prevent vanishing gradients in the softmax function.
+
+\subsubsection{Feed-Forward Network and GELU Activation}
+Following the attention sub-layer, the output is processed by a fully connected Feed-Forward Network (FFN) applied to each position separately and identically. This consists of two linear transformations with a non-linear activation function. A distinguishing feature of BERT, compared to the original Transformer which used ReLU, is the adoption of the Gaussian Error Linear Unit (GELU). The FFN is formulated as:
+
+\begin{equation}
+\mathrm{FFN}(x) = \mathrm{GELU}(xW_1 + b_1)W_2 + b_2,
+\label{eq:ffn}
+\end{equation}
+
+where $W_1$ projects the hidden state from $H$ to an intermediate dimension (3072 for \texttt{BERT\textsubscript{BASE}}), and $W_2$ projects it back to $H$. The GELU activation, defined as $x\Phi(x)$ (where $\Phi(x)$ is the standard Gaussian cumulative distribution function), provides a smoother non-linearity that aids optimization in deep architectures.
+
+\subsubsection{Residual Connections and Normalization}
+To enable the training of deep networks, the output of each sub-layer is stabilized using residual connections and Layer Normalization (LayerNorm):
+
+\begin{equation}
+\mathrm{Output} = \mathrm{LayerNorm}(x + \mathrm{Sublayer}(x)).
+\label{eq:addnorm}
+\end{equation}
+
+Unlike Batch Normalization, Layer Normalization computes statistics across the feature dimension for each token independently, making it invariant to batch size and sequence length.
+
+\subsection{Input Representation}
+
+To handle a wide variety of downstream tasks, BERT requires a flexible input representation capable of handling both single sentences and sentence pairs.
+
+\subsubsection{WordPiece Tokenization}
+BERT utilizes a WordPiece vocabulary of 30,000 tokens. This tokenization strategy mitigates the out-of-vocabulary (OOV) problem by decomposing rare words into sub-word units (e.g., "playing" $\rightarrow$ \texttt{play} + \texttt{\#\#ing}).
+
+\subsubsection{Embedding Summation}
+The input representation for a given token is constructed by summing three distinct embeddings:
+\begin{equation}
+\mathbf{E} = \mathbf{E}_{token} + \mathbf{E}_{segment} + \mathbf{E}_{position}.
+\label{eq:embeddings}
+\end{equation}
+\begin{itemize}
+    \item \textbf{Token Embeddings:} Vector representations of the WordPiece tokens.
+    \item \textbf{Segment Embeddings:} Learned vectors indicating whether a token belongs to sentence A or sentence B.
+    \item \textbf{Position Embeddings:} Learned vectors injecting absolute positional information, necessary due to the permutation-invariance of self-attention.
+\end{itemize}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{images/Q6/figura2.jpg}
+  \caption{BERT input representation. The input embeddings are the sum of the token embeddings, the segmentation embeddings, and the position embeddings \cite{b_bert}.}
+  \label{fig:bert_input}
+\end{figure}
+
+Every sequence starts with a special classification token (\texttt{[CLS]}). The final hidden state corresponding to this token ($C \in \mathbb{R}^H$) is used as the aggregate sequence representation for classification tasks. A separator token (\texttt{[SEP]}) is used to distinguish between sequences.
+
+\subsection{Pre-training Objectives}
+
+BERT is pre-trained on two unsupervised tasks using the BooksCorpus (800M words) and English Wikipedia (2,500M words).
+
+\subsubsection{Masked Language Model (MLM)}
+To achieve deep bidirectionality without allowing tokens to "see themselves" in multi-layered contexts, BERT masks 15\% of the input tokens at random. The objective is to predict the original vocabulary id of the masked word based only on its context. To mitigate the mismatch between pre-training and fine-tuning (where the \texttt{[MASK]} token does not appear), the training data generator employs the following strategy for the selected tokens:
+\begin{itemize}
+    \item 80\% of the time: Replace with the \texttt{[MASK]} token.
+    \item 10\% of the time: Replace with a random token.
+    \item 10\% of the time: Keep the original token unchanged.
+\end{itemize}
+
+\subsubsection{Next Sentence Prediction (NSP)}
+Many downstream tasks (e.g., QA and NLI) require understanding the relationship between two sentences. To model this, BERT is trained on a binary classification task to predict whether a sentence $B$ is the actual next sentence that follows sentence $A$ (IsNext) or a random sentence from the corpus (NotNext).
+
+\subsection{Application Strategies}
+
+As demonstrated in the ablation studies by Devlin et al., BERT can be applied to downstream tasks in two ways: \textit{fine-tuning}, where all parameters are updated end-to-end, and the \textit{feature-based approach}, where fixed features are extracted from specific layers.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.85\linewidth]{images/Q6/tabla1.jpg}
+  \caption{Feature-based approach results on CoNLL-2003 NER. Concatenating the last 4 hidden layers yields performance comparable to fine-tuning \cite{b_bert}.}
+  \label{fig:bert_table}
+\end{figure}
+
+Experimental results shown in Fig. \ref{fig:bert_table} indicate that concatenating the token representations from the top four hidden layers yields performance competitive with fine-tuning (96.1 F1 vs 96.4 F1). In our theoretical framework, this justifies the use of extracted embeddings as robust inputs for downstream classifiers.
+
 \section{Conclusion}
 
 This section is intended to establish a set of conclusions regarding the implementation of sentiment classification methods for short English texts. First, it is important to emphasize the analysis carried out in the preliminary phase of the dataset and its main characteristics. From this analysis, it is observed that, given the available training information, the primary variable of interest for training this type of classifier is undoubtedly the processed text after stopword removal, mainly because the class distribution with respect to the other variables included in the dataset either remains constant, as in the case of age ranges, or could imply an increased risk of memorizing incorrect patterns, since the elements of each class within the non-considered category are not representative of the overall compilation, as in the case of the country variable.
@@ -446,5 +548,8 @@ After completing the training of the MLP models, the classical machine-learning 
 
 \bibitem{b19} PyTorch contributors, ``torch.nn.Linear,'' \emph{PyTorch Documentation}, accessed Jan. 18, 2026. [Online]. Available: https://docs.pytorch.org/docs/stable/generated/torch.nn.Linear.html
 
+\bibitem{b_bert} J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, ``BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding,'' in \emph{Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies}, vol. 1, Minneapolis, Minnesota, Jun. 2019, pp. 4171--4186.
+
+\bibitem{b_att} A. Vaswani et al., ``Attention is all you need,'' in \emph{Advances in Neural Information Processing Systems}, vol. 30, Long Beach, CA, Dec. 2017.
 \end{thebibliography}
 \end{document}
