@@ -1,64 +1,64 @@
-\section{Q7---Fine-tuning avec LoRA pour la classification de sentiment}
+\section{Q7-Ajustement fin avec LoRA pour la classification de sentiment}
 \label{sec:q7}
 
-LoRA (\emph{Low-Rank Adaptation}) est une m\'ethode de \emph{Parameter-Efficient Fine-Tuning} (PEFT) permettant d'adapter des mod\`eles pr\'eentra\^{\i}n\'es (p.\ ex.\ Transformers) sans mettre \`a jour l'ensemble des param\`etres. Les poids d'origine sont gel\'es et de petites matrices de rang faible, entra\^{\i}nables, sont inject\'ees dans certaines couches (souvent des projections lin\'eaires de l'attention). Cela r\'eduit fortement le nombre de param\`etres entra\^{\i}nables et le co\^ut d'entra\^{\i}nement/m\'emoire, tout en conservant la capacit\'e de sp\'ecialisation \`a la t\^ache.
+LoRA (\emph{Low-Rank Adaptation}) est une méthode d’\emph{Ajustement fin efficace en paramètres} (PEFT) conçue pour adapter de grands modèles pré-entraînés (par exemple, des Transformers) sans mettre à jour tous les paramètres. Au lieu d’effectuer un ajustement fin complet du backbone, LoRA fige les poids d’origine et injecte de petites matrices de faible rang entraînables dans des couches sélectionnées (typiquement des projections linéaires au sein de l’attention). Cela réduit substantiellement le nombre de paramètres entraînables et le coût d’entraînement/mémoire, tout en préservant la capacité du modèle à se spécialiser sur la tâche cible.
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=\linewidth]{images/Q7/BERT_+_LoRA_(SEQ_CLS)_Full_Report.png}
-  \caption{Rapport d'\'evaluation complet pour \textbf{BERT + LoRA (SEQ\_CLS)} sur test.}
+  \caption{Rapport d’évaluation complet pour \textbf{BERT + LoRA (SEQ\_CLS)} sur l’ensemble de test (résumé des métriques, matrice de confusion et analyse ROC).}
   \label{fig:q7-bert-lora-full-report}
 \end{figure}
 
-\subsection{Aper\c{c}u d'impl\'ementation}
+\subsection{Aperçu de l’implémentation (pipeline notebook)}
 \label{subsec:q7-impl}
 
-Le pipeline suit un sch\'ema standard :
-(1) pr\'eparation du jeu de donn\'ees et split \emph{train/validation/test} ;
-(2) tokenisation via le tokenizer du mod\`ele de base ;
-(3) chargement d'un mod\`ele de classification (\texttt{AutoModelForSequenceClassification}) ;
-(4) injection des adaptateurs LoRA via \texttt{get\_peft\_model} ;
-(5) entra\^{\i}nement avec \texttt{Trainer} et \texttt{TrainingArguments} ;
-(6) \'evaluation finale sur test (voir Fig.~\ref{fig:q7-bert-lora-full-report}).
+L’implémentation suit un flux de travail standard de classification basé sur Transformer :
+(1) préparation du jeu de données et découpage \emph{train/validation/test} ;
+(2) tokenisation avec le tokenizer du modèle de base ;
+(3) chargement d’un modèle de classification de séquence pré-entraîné (\texttt{AutoModelForSequenceClassification}) ;
+(4) injection d’adaptateurs LoRA via \texttt{get\_peft\_model} ;
+(5) entraînement avec \texttt{Trainer} et \texttt{TrainingArguments} ; et
+(6) évaluation finale sur l’ensemble de test, incluant des métriques et des rapports diagnostiques (voir Fig.~\ref{fig:q7-bert-lora-full-report}).
 
 \subsection{Configuration LoRA (justification)}
 \label{subsec:q7-lora-params}
 
-La configuration retenue est :
+La configuration LoRA est définie comme suit :
 \begin{itemize}
-    \item \textbf{\texttt{task\_type=TaskType.SEQ\_CLS}} : PEFT configur\'e pour la classification de s\'equences.
-    \item \textbf{\texttt{target\_modules=["query","value"]}} : injection dans des projections influentes (Q/V), bon compromis capacit\'e/co\^ut.
-    \item \textbf{\texttt{r=8}} : rang (capacit\'e) mod\'er\'e, adapt\'e \`a l'analyse de sentiment.
-    \item \textbf{\texttt{lora\_alpha=16}} : facteur d'\'echelle des mises \`a jour LoRA.
-    \item \textbf{\texttt{lora\_dropout=0.1}} : r\'egularisation du chemin LoRA pour limiter le sur-apprentissage.
+    \item \textbf{\texttt{task\_type=TaskType.SEQ\_CLS}} configure PEFT pour la classification de séquence (sortie logits), plutôt que pour des gabarits orientés génération.
+    \item \textbf{\texttt{target\_modules=["query","value"]}} injecte LoRA dans des projections d’attention très influentes (Q/V), un choix courant qui équilibre la capacité d’adaptation et le coût.
+    \item \textbf{\texttt{r=8}} fixe le rang de l’adaptateur (capacité). Un rang modéré est typiquement suffisant pour la classification de sentiment tout en limitant les paramètres et le risque de surapprentissage.
+    \item \textbf{\texttt{lora\_alpha=16}} met à l’échelle la contribution LoRA (souvent proportionnelle à $\alpha/r$), soutenant des mises à jour stables.
+    \item \textbf{\texttt{lora\_dropout=0.1}} régularise le chemin LoRA, réduisant le surapprentissage sur des jeux de données non massifs.
 \end{itemize}
 
-\subsection{R\'esultats sur test : BERT + LoRA (SEQ\_CLS)}
+\subsection{Résultats sur l’ensemble de test : BERT + LoRA (SEQ\_CLS)}
 \label{subsec:q7-results}
 
-Le mod\`ele \textbf{BERT + LoRA (SEQ\_CLS)} obtient :
+Le modèle \textbf{BERT + LoRA (SEQ\_CLS)} atteint :
 \begin{itemize}
     \item Accuracy = 0.761
     \item Macro-Recall = 0.760
     \item Macro-F1 = 0.763
 \end{itemize}
-Il rapporte en outre un ROC-AUC pond\'er\'e de 0.901, et des AUC par classe de 0.91 (classe 0), 0.86 (classe 1) et 0.94 (classe 2), ce qui indique une bonne s\'eparabilit\'e globale (Fig.~\ref{fig:q7-bert-lora-full-report}).
+De plus, il rapporte un ROC-AUC pondéré = 0.901, avec des valeurs d’AUC par classe de 0.91 (classe 0), 0.86 (classe 1) et 0.94 (classe 2), indiquant une forte séparabilité globale et une discrimination particulièrement robuste pour la classe 2 (voir Fig.~\ref{fig:q7-bert-lora-full-report}).
 
-\subsection{Comparaison directe avec la baseline embeddings BERT (LinearHead 768$\rightarrow$3)}
+\subsection{Comparaison directe avec la baseline d’embeddings BERT (LinearHead 768$\rightarrow$3)}
 \label{subsec:q7-compare-bert-baseline}
 
-Par rapport \`a la baseline pr\'ec\'edente (\emph{Approach = MLP; Representation = BERT; Model = LinearHead(768$\rightarrow$3)}), qui rapporte
-Acc = 0.664, Macro-R = 0.662, et Macro-F1 = 0.666,
-LoRA am\'eliore de mani\`ere coh\'erente toutes les m\'etriques :
+Comparé à la baseline précédente (\emph{Approach = MLP; Representation = BERT; Model = LinearHead(768$\rightarrow$3)}), qui rapporte
+Acc = 0.664, Macro-R = 0.662 et Macro-F1 = 0.666,
+LoRA améliore de manière cohérente toutes les métriques principales :
 \begin{itemize}
-    \item \textbf{Accuracy :} $0.761$ vs.\ $0.664$ $\Rightarrow$ $+0.097$ (environ $+14.6\%$ relatif)
-    \item \textbf{Macro-Recall :} $0.760$ vs.\ $0.662$ $\Rightarrow$ $+0.098$ (environ $+14.8\%$ relatif)
-    \item \textbf{Macro-F1 :} $0.763$ vs.\ $0.666$ $\Rightarrow$ $+0.097$ (environ $+14.6\%$ relatif)
+    \item \textbf{Accuracy:} $0.761$ vs.\ $0.664$ $\Rightarrow$ $+0.097$ (environ $+14.6\%$ relatif)
+    \item \textbf{Macro-Recall:} $0.760$ vs.\ $0.662$ $\Rightarrow$ $+0.098$ (environ $+14.8\%$ relatif)
+    \item \textbf{Macro-F1:} $0.763$ vs.\ $0.666$ $\Rightarrow$ $+0.097$ (environ $+14.6\%$ relatif)
 \end{itemize}
 
-Ces gains sont coh\'erents avec l'objectif de LoRA : au lieu d'entra\^{\i}ner uniquement une t\^ete sur des embeddings fig\'es, l'encodeur est l\'eg\`erement adapt\'e via des mises \`a jour de rang faible dans des modules d'attention, ce qui am\'eliore la repr\'esentation interne pour la classification.
+Ce gain est cohérent avec l’objectif de LoRA : au lieu d’entraîner uniquement une tête peu profonde sur des embeddings figés, l’encodeur est légèrement adapté via des mises à jour de faible rang dans des modules d’attention clés, améliorant la représentation interne pour la classification de sentiment. D’un point de vue analyse d’erreurs, la matrice de confusion de la Fig.~\ref{fig:q7-bert-lora-full-report} reste fortement diagonale (forte classification correcte à travers les classes), tandis que les erreurs principales se concentrent vers la classe 1, suggérant que la classe 1 se comporte comme une région intermédiaire plus ambiguë.
 
-\subsection{Positionnement dans le projet}
+\subsection{Positionnement du projet}
 \label{subsec:q7-positioning}
 
-Avec Macro-F1 = 0.763, \textbf{BERT + LoRA (SEQ\_CLS)} d\'epasse la baseline BERT + LinearHead ainsi que les meilleurs pipelines classiques/MLP rapport\'es auparavant (cf.\ Table~\ref{tab:q3-classical-vs-mlp}). Ce mod\`ele constitue donc, \`a ce stade, le meilleur mod\`ele entra\^{\i}n\'e du projet.
+Avec Macro-F1 = 0.763, BERT + LoRA (SEQ\_CLS) dépasse à la fois la baseline BERT + LinearHead et les meilleurs pipelines classiques/MLP rapportés plus tôt (cf.\ Table~\ref{tab:q3-classical-vs-mlp}). Par conséquent, BERT + LoRA (SEQ\_CLS) se positionne actuellement comme le modèle le plus performant de ce projet, fournissant la meilleure performance sur test avec des améliorations claires des métriques macro, qui sont les plus informatives en présence de déséquilibre de classes.

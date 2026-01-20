@@ -1,37 +1,36 @@
-\section{Q4 : Analyse comparative avec des grands mod\`eles de langage (LLM)}
+\section{Q4: Analyse comparative avec des grands modèles de langage (LLMs)}
 
-Cette analyse compare la meilleure architecture bas\'ee sur BERT \`a un grand mod\`ele de langage moderne. L'objectif est d'\'evaluer si un mod\`ele g\'en\'eratif g\'en\'eraliste, utilis\'e uniquement en inf\'erence, peut rivaliser avec un encodeur sp\'ecialis\'e ayant \'et\'e adapt\'e \`a la t\^ache.
+Cette analyse se concentre sur la comparaison des performances de l’architecture optimisée basée sur BERT avec un grand modèle de langage (LLM) moderne. L’objectif fondamental est d’évaluer si un modèle génératif généraliste, opérant uniquement en mode inférence, est capable de rivaliser avec ou de surpasser l’efficacité d’un encodeur spécialisé ayant subi un ajustement fin.
+\subsection{Méthodologie : Inférence générative}
 
-\subsection{M\'ethodologie : inf\'erence g\'en\'erative}
+Pour cette comparaison, gemma-3-4b-it a été sélectionné, un modèle ajusté par instruction de la famille Gemma de Google avec environ 4 milliards de paramètres. Contrairement à la baseline BERT considérée à ce stade---qui utilise des embeddings BERT fixes avec un classifieur linéaire simple (\texttt{LinearHead(768$\rightarrow$3)})---le LLM est évalué via du Few-Shot Prompting au moyen de l’API Google GenAI, sans aucune mise à jour de paramètres.
 
-Le mod\`ele gemma-3-4b-it est retenu (instruction-tuned, $\sim$4 milliards de param\`etres). Contrairement \`a la baseline BERT de cette partie --- embeddings BERT fig\'es avec une t\^ete lin\'eaire (\texttt{LinearHead(768$\rightarrow$3)}) --- le LLM est \'evalu\'e via \emph{few-shot prompting} avec l'API Google GenAI, sans mise \`a jour de param\`etres.
-
-Le protocole est d\'efini comme suit :
+Le dispositif expérimental a été défini comme suit :
 \begin{itemize}
-    \item \textbf{Prompt engineering :} le mod\`ele est explicitement instruit \`a se comporter comme un expert en analyse de sentiment.
-    \item \textbf{Contexte few-shot :} trois exemples annot\'es (un par classe : Positive, Negative, Neutral) sont fournis avant la requ\^ete cible.
-    \item \textbf{Contraintes de sortie :} la g\'en\'eration est contrainte \`a un label mono-mot mapp\'e vers les classes num\'eriques ($0,1,2$).
-    \item \textbf{Sous-ensemble d'\'evaluation :} pour des raisons de latence et de quotas API, l'\'evaluation est men\'ee sur 1\,000 exemples repr\'esentatifs du test.
+    \item \textbf{Ingénierie de prompt :} Le modèle a été explicitement instruit d’agir comme un "expert en analyse de sentiment".
+    \item \textbf{Contexte few-shot :} Pour guider le raisonnement du modèle sans mise à jour des poids, trois exemples étiquetés (un pour chaque classe : Positive, Negative, Neutral) ont été fournis dans la fenêtre de contexte du prompt avant la requête cible.
+    \item \textbf{Contraintes de sortie :} La génération a été restreinte à produire des étiquettes d’un seul mot mappées à nos classes numériques ($0, 1, 2$).
+    \item \textbf{Sous-ensemble d’évaluation :} En raison des limites de débit de l’API et des contraintes de latence, l’évaluation a été réalisée sur un sous-ensemble représentatif de 1,000 échantillons de l’ensemble de test.
 \end{itemize}
 
-\subsection{\'Evaluation de performance}
+\subsection{Évaluation des performances}
 
-Les capacit\'es g\'en\'eratives de Gemma sont compar\'ees au mod\`ele \texttt{BERT Linear Head}, qui pr\'esente la meilleure performance parmi les configurations BERT test\'ees pr\'ec\'edemment.
+Nous comparons les capacités génératives de Gemma au modèle \texttt{BERT Linear Head}, qui a obtenu la meilleure performance parmi les configurations BERT testées dans la section précédente.
 
-\subsubsection{R\'esultats LLM (Gemma-3-4b-it)}
-La Fig.~\ref{fig:gemma_res} pr\'esente le rapport de classification du mod\`ele g\'en\'eratif. Gemma atteint une \textbf{Accuracy de 0.632} et un \textbf{Macro-F1 de 0.630}.
+\subsubsection{Résultats LLM (Gemma-3-4b-it)}
+La Fig. \ref{fig:gemma_res} présente le rapport de classification pour le modèle génératif. Gemma a atteint une \textbf{Accuracy de 0.632} et un \textbf{Macro F1 de 0.630}.
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=\linewidth]{images/Q4/gemma_report.png}
-  \caption{Rapport de performance pour Gemma-3-4b-it (inf\'erence few-shot). Le mod\`ele pr\'esente une performance mod\'er\'ee et relativement \'equilibr\'ee, avec une confusion notable entre sentiments polaris\'es et classe neutre.}
+  \caption{Rapport de performance pour Gemma-3-4b-it (inférence few-shot). Le modèle montre une performance équilibrée mais modérée, avec une confusion notable entre les sentiments polarisés et la classe neutre.}
   \label{fig:gemma_res}
 \end{figure}
 
-La matrice de confusion met en \'evidence une faiblesse : une tendance \`a classer des tweets polaris\'es (positifs/n\'egatifs) comme neutres. Ce comportement est souvent associ\'e \`a l'alignement (RLHF) des mod\`eles instruction-tuned, qui peut favoriser des sorties plus neutres en cas d'ambigu\"it\'e.
+La matrice de confusion révèle une faiblesse spécifique : une tendance à mal classifier les tweets polarisés (Positif/Négatif) comme Neutres. Ce comportement est souvent attribué à l’alignement de sécurité (RLHF) des modèles ajustés par instruction, qui les biaise vers des réponses neutres ou peu engageantes face à l’ambiguïté.
 
-\subsubsection{R\'esultats bas\'es sur BERT}
-La Fig.~\ref{fig:bert_best} pr\'esente la performance de la baseline \texttt{BERT Linear Head}. Ce mod\`ele atteint une \textbf{Accuracy de 0.664} et un \textbf{Macro-F1 de 0.666}.
+\subsubsection{Résultats basés sur BERT}
+La Fig. \ref{fig:bert_best} affiche les performances du \texttt{BERT Linear Head} ajusté. Ce modèle a atteint une \textbf{Accuracy de 0.664} et un \textbf{Macro F1 de 0.666}.
 
 \begin{figure}[!ht]
   \centering
@@ -40,22 +39,22 @@ La Fig.~\ref{fig:bert_best} pr\'esente la performance de la baseline \texttt{BER
   \label{fig:bert_best}
 \end{figure}
 
-Le mod\`ele BERT pr\'esente une diagonale plus marqu\'ee dans la matrice de confusion, ce qui indique un meilleur pouvoir discriminant sur cette distribution de donn\'ees.
+Le modèle BERT démontre une diagonale plus marquée dans la matrice de confusion, indiquant un pouvoir discriminant supérieur pour cette distribution de données spécifique par rapport au LLM en few-shot.
 
-\subsection{Discussion : sp\'ecialisation vs g\'en\'eralisation}
+\subsection{Discussion : Spécialisation vs. Généralisation}
 
-La comparaison entre l'encodeur sp\'ecialis\'e (BERT) et le d\'ecodeur g\'en\'eraliste (Gemma) est r\'esum\'ee en Table~\ref{tab:llm_vs_bert}.
+La comparaison entre l’encodeur spécialisé (BERT) et le décodeur généraliste (Gemma) offre des enseignements précieux, résumés dans le Tableau \ref{tab:llm_vs_bert}.
 
 \begin{table}[htbp]
-\caption{Comparaison directe : encodeur fine-tun\'e vs LLM few-shot}
+\caption{Comparaison directe : encodeur ajusté vs. LLM few-shot}
 \begin{center}
 \begin{tabular}{|l|c|c|c|}
 \hline
-\textbf{Mod\`ele} & \textbf{Params} & \textbf{M\'ethode} & \textbf{Macro F1} \\
+\textbf{Modèle} & \textbf{Paramètres} & \textbf{Méthode} & \textbf{Macro F1} \\
 \hline
-\textbf{BERT (lin\'eaire)} & \textbf{110M} & \textbf{Fine-tuning} & \textbf{0.666} \\
+\textbf{BERT (Linéaire)} & \textbf{110M} & \textbf{Fine-Tuning} & \textbf{0.666} \\
 \hline
-Gemma-3-4b-it & 4B & Few-shot & 0.630 \\
+Gemma-3-4b-it & 4B & Few-Shot & 0.630 \\
 \hline
 \end{tabular}
 \label{tab:llm_vs_bert}
@@ -63,6 +62,8 @@ Gemma-3-4b-it & 4B & Few-shot & 0.630 \\
 \end{table}
 
 \begin{enumerate}
-    \item \textbf{\'Ecart de performance :} BERT surpasse Gemma d'environ \textbf{3.6\% en Macro-F1}. Cela confirme que, pour ce jeu de donn\'ees, un mod\`ele plus petit adapt\'e au domaine est plus efficace qu'un mod\`ele massif utilis\'e en few-shot.
-    \item \textbf{Efficacit\'e de ressources :} l'\'ecart est important. BERT (110M) peut \^etre d\'eploy\'e avec une faible latence sur du mat\'eriel standard, tandis que Gemma (4B) requiert une VRAM significative ou une d\'ependance API.
+    \item \textbf{Écart de performance :} Le modèle BERT ajusté surpasse le LLM d’environ \textbf{3.6\% en Macro F1}. Cela confirme que, pour ce jeu de données, un modèle plus petit adapté au domaine spécifique est plus efficace qu’un modèle massif s’appuyant sur des connaissances générales (few-shot).
+    
+    \item \textbf{Efficacité des ressources :} L’écart d’efficacité est substantiel. Le modèle BERT (110M paramètres) peut être déployé pour l’inférence avec une faible latence sur du matériel standard. En revanche, le LLM (4B paramètres) requiert une VRAM significative ou une dépendance à une API.
+    
 \end{enumerate}

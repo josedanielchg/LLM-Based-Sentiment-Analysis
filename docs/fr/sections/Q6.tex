@@ -1,86 +1,109 @@
-\section{Q6---Architecture BERT et cadre th\'eorique}
+\section{Q6-Architecture de BERT et Cadre Théorique}
 
-BERT (\emph{Bidirectional Encoder Representations from Transformers}) marque un changement de paradigme en apprentissage de repr\'esentations de langage. Contrairement \`a des mod\`eles unidirectionnels (p.\ ex.\ GPT) ou \`a des concat\'enations peu profondes (p.\ ex.\ ELMo), BERT pr\'eentra\^{\i}ne des repr\'esentations profondes bidirectionnelles en conditionnant simultan\'ement \`a gauche et \`a droite \`a tous les niveaux \cite{b_bert}.
+Les Bidirectional Encoder Representations from Transformers (BERT) représentent un changement de paradigme dans l’apprentissage des représentations du langage. Contrairement aux modèles précédents qui reposaient sur un traitement unidirectionnel (par exemple, OpenAI GPT) ou sur une concaténation superficielle de modèles indépendants gauche-à-droite et droite-à-gauche (par exemple, ELMo), BERT est conçu pour pré-entraîner des représentations bidirectionnelles profondes à partir de texte non annoté en conditionnant conjointement sur les contextes gauche et droit dans toutes les couches \cite{b_bert}.
 
-\subsection{Architecture du mod\`ele}
+\subsection{Architecture du modèle}
 
-L'architecture est un encodeur Transformer bidirectionnel, bas\'e sur Vaswani et al.\ \cite{b_att}, compos\'e d'une pile de $L$ blocs identiques.
+L’architecture de BERT est un encodeur Transformer bidirectionnel multi-couches basé sur l’implémentation originale décrite par Vaswani et al. \cite{b_att}. Le modèle est composé d’une pile de $L$ couches identiques (blocs Transformer).
 
-Deux tailles sont classiquement consid\'er\'ees \cite{b_bert} :
+Devlin et al. définissent deux tailles de modèle principales afin d’évaluer l’effet de la capacité du modèle \cite{b_bert}:
 \begin{itemize}
-    \item \textbf{BERT\textsubscript{BASE} :} $L=12$, taille cach\'ee $H=768$, $A=12$ t\^etes d'attention, $\sim$110M param\`etres.
-    \item \textbf{BERT\textsubscript{LARGE} :} $L=24$, $H=1024$, $A=16$, $\sim$340M param\`etres.
+    \item \textbf{BERT\textsubscript{BASE}:} Défini avec $L=12$ couches, une taille cachée de $H=768$, et $A=12$ têtes d’auto-attention, totalisant environ 110 millions de paramètres. Cette taille a été choisie pour être comparable à OpenAI GPT pour une évaluation équitable.
+    \item \textbf{BERT\textsubscript{LARGE}:} Un réseau significativement plus profond et plus large avec $L=24$, $H=1024$, et $A=16$, résultant en environ 340 millions de paramètres.
 \end{itemize}
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=\linewidth]{images/Q6/bert_arch_comparison.jpg}
-  \caption{Diff\'erences d'architectures de pr\'eentra\^{\i}nement. BERT utilise un Transformer bidirectionnel \cite{b_bert}.}
+  \caption{Différences dans les architectures de modèles de pré-entraînement. BERT utilise un Transformer bidirectionnel, ce qui le distingue d’OpenAI GPT et d’ELMo \cite{b_bert}.}
   \label{fig:bert_arch}
 \end{figure}
+Au sein de chaque couche, l’architecture emploie deux sous-couches principales : un mécanisme d’Auto-Attention Multi-Têtes et un Réseau Feed-Forward positionnel. De manière cruciale, une connexion résiduelle est employée autour de chacune de ces deux sous-couches, suivie d’une normalisation de couche.
 
-Chaque bloc comprend (i) une attention multi-t\^etes et (ii) un r\'eseau feed-forward positionnel, avec connexions r\'esiduelles et normalisation de couche.
+\subsubsection{Auto-Attention multi-têtes}
+Ce mécanisme permet au modèle d’assister conjointement à des informations provenant de différents sous-espaces de représentation à différentes positions. La fonction d’attention est calculée sur un ensemble de requêtes ($Q$), de clés ($K$), et de valeurs ($V$) regroupées en matrices. La sortie est une attention à produit scalaire mis à l’échelle :
 
-\subsubsection{Attention multi-t\^etes}
-La sortie est donn\'ee par une attention \`a produit scalaire normalis\'e :
 \begin{equation}
 \mathrm{Attention}(Q, K, V) = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V,
 \label{eq:attention}
 \end{equation}
-o\`u $d_k$ est la dimension des cl\'es, introduite comme facteur d'\'echelle.
 
-\subsubsection{R\'eseau feed-forward et activation GELU}
-Le FFN applique deux transformations lin\'eaires avec une non-lin\'earit\'e GELU :
+où $d_k$ est la dimension des vecteurs clés, servant de facteur d’échelle pour prévenir la disparition des gradients dans la fonction softmax.
+
+\subsubsection{Réseau Feed-Forward et activation GELU}
+Après la sous-couche d’attention, la sortie est traitée par un Réseau Feed-Forward (FFN) entièrement connecté appliqué à chaque position séparément et de manière identique. Celui-ci consiste en deux transformations linéaires avec une fonction d’activation non linéaire. Une caractéristique distinctive de BERT, comparée au Transformer original qui utilisait ReLU, est l’adoption de la Gaussian Error Linear Unit (GELU). Le FFN est formulé comme suit :
+
 \begin{equation}
 \mathrm{FFN}(x) = \mathrm{GELU}(xW_1 + b_1)W_2 + b_2,
 \label{eq:ffn}
 \end{equation}
-avec une dimension interm\'ediaire de 3072 pour \texttt{BERT\textsubscript{BASE}}.
 
-\subsubsection{Connexions r\'esiduelles et normalisation}
+où $W_1$ projette l’état caché de $H$ vers une dimension intermédiaire (3072 pour \texttt{BERT\textsubscript{BASE}}), et $W_2$ le reprojette vers $H$. L’activation GELU, définie comme $x\Phi(x)$ (où $\Phi(x)$ est la fonction de répartition gaussienne standard), fournit une non-linéarité plus lisse qui aide l’optimisation dans les architectures profondes.
+
+\subsubsection{Connexions résiduelles et normalisation}
+Pour permettre l’entraînement de réseaux profonds, la sortie de chaque sous-couche est stabilisée en utilisant des connexions résiduelles et la Normalisation de Couche (LayerNorm) :
+
 \begin{equation}
 \mathrm{Output} = \mathrm{LayerNorm}(x + \mathrm{Sublayer}(x)).
 \label{eq:addnorm}
 \end{equation}
 
-\subsection{Repr\'esentation d'entr\'ee}
+Contrairement à la Normalisation de Lot, la Normalisation de Couche calcule des statistiques à travers la dimension des caractéristiques pour chaque token indépendamment, la rendant invariante à la taille du lot et à la longueur de la séquence.
+
+\subsection{Représentation d’entrée}
+
+Pour gérer une grande variété de tâches en aval, BERT nécessite une représentation d’entrée flexible capable de traiter à la fois des phrases uniques et des paires de phrases.
 
 \subsubsection{Tokenisation WordPiece}
-BERT utilise un vocabulaire WordPiece (30\,000 tokens), limitant l'OOV via des sous-mots (ex.\ ``playing'' $\rightarrow$ \texttt{play} + \texttt{\#\#ing}).
+BERT utilise un vocabulaire WordPiece de 30,000 tokens. Cette stratégie de tokenisation atténue le problème hors-vocabulaire (OOV) en décomposant les mots rares en unités sous-mots (par exemple, "playing" $\rightarrow$ \texttt{play} + \texttt{\#\#ing}).
 
-\subsubsection{Somme d'embeddings}
-Chaque token est repr\'esent\'e par la somme :
+\subsubsection{Somme des embeddings}
+La représentation d’entrée pour un token donné est construite en sommant trois embeddings distincts :
 \begin{equation}
 \mathbf{E} = \mathbf{E}_{token} + \mathbf{E}_{segment} + \mathbf{E}_{position}.
 \label{eq:embeddings}
 \end{equation}
+\begin{itemize}
+    \item \textbf{Embeddings de tokens:} Représentations vectorielles des tokens WordPiece.
+    \item \textbf{Embeddings de segments:} Vecteurs appris indiquant si un token appartient à la phrase A ou à la phrase B.
+    \item \textbf{Embeddings de position:} Vecteurs appris injectant une information positionnelle absolue, nécessaire en raison de l’invariance par permutation de l’auto-attention.
+\end{itemize}
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=\linewidth]{images/Q6/bert_input_rep.jpg}
-  \caption{BERT input representation \cite{b_bert}.}
+  \caption{Représentation d’entrée de BERT \cite{b_bert}.}
   \label{fig:bert_input}
 \end{figure}
 
-Comme illustr\'e en Fig.~\ref{fig:bert_input}, l'embedding d'entr\'ee de chaque token combine : (i) l'identit\'e lexicale (token), (ii) l'appartenance \`a un segment (A/B), et (iii) la position (ordre). Chaque s\'equence commence par le token \texttt{[CLS]} ; l'\'etat cach\'e final associ\'e \`a \texttt{[CLS]} ($C \in \mathbb{R}^H$) est couramment utilis\'e comme repr\'esentation agr\'eg\'ee pour la classification. Le token \texttt{[SEP]} sert \`a d\'elimitation/s\'eparation des s\'equences.
+Comme illustré à la Fig.~\ref{fig:bert_input}, chaque token d’entrée est mappé vers un embedding qui combine trois composantes : les embeddings de tokens (identité lexicale), les embeddings de segments (appartenance à une phrase/segment), et les embeddings de position (ordre des tokens). En outre, chaque séquence commence avec le token spécial de classification \texttt{[CLS]}. L’état caché final associé à \texttt{[CLS]} ($C \in \mathbb{R}^H$) est couramment utilisé comme une représentation agrégée de l’ensemble de la séquence pour la classification en aval. Un token séparateur \texttt{[SEP]} est utilisé pour délimiter (ou séparer) des séquences lorsque nécessaire.
 
-\subsection{Objectifs de pr\'eentra\^{\i}nement}
+Chaque séquence commence avec un token spécial de classification (\texttt{[CLS]}). L’état caché final correspondant à ce token ($C \in \mathbb{R}^H$) est utilisé comme la représentation agrégée de la séquence pour les tâches de classification. Un token séparateur (\texttt{[SEP]}) est utilisé pour distinguer entre les séquences.
 
-BERT est pr\'eentra\^{\i}n\'e sur BooksCorpus et Wikipedia via deux t\^aches : MLM et NSP.
+\subsection{Objectifs de pré-entraînement}
 
-\subsubsection{Masked Language Model (MLM)}
-15\% des tokens sont s\'electionn\'es : 80\% remplac\'es par \texttt{[MASK]}, 10\% par un token al\'eatoire, 10\% inchang\'es, afin de r\'eduire le d\'ecalage pr\'eentra\^{\i}nement/fine-tuning.
+BERT est pré-entraîné sur deux tâches non supervisées en utilisant le BooksCorpus (800M mots) et Wikipédia anglais (2,500M mots).
 
-\subsubsection{Next Sentence Prediction (NSP)}
-BERT pr\'edit si une phrase $B$ suit $A$ (IsNext) ou est al\'eatoire (NotNext), afin de mod\'eliser des relations inter-phrases.
+\subsubsection{Modèle de langage masqué (MLM)}
+Pour atteindre une bidirectionnalité profonde sans permettre aux tokens de "se voir eux-mêmes" dans des contextes multi-couches, BERT masque 15\% des tokens d’entrée aléatoirement. L’objectif est de prédire l’identifiant de vocabulaire original du mot masqué en se basant uniquement sur son contexte. Pour atténuer le décalage entre le pré-entraînement et le fine-tuning (où le token \texttt{[MASK]} n’apparaît pas), le générateur de données d’entraînement emploie la stratégie suivante pour les tokens sélectionnés :
+\begin{itemize}
+    \item 80\% du temps: Remplacer par le token \texttt{[MASK]}.
+    \item 10\% du temps: Remplacer par un token aléatoire.
+    \item 10\% du temps: Conserver le token original inchangé.
+\end{itemize}
 
-\subsection{Strat\'egies d'application}
+\subsubsection{Prédiction de la phrase suivante (NSP)}
+De nombreuses tâches en aval (par exemple, QA et NLI) requièrent de comprendre la relation entre deux phrases. Pour modéliser cela, BERT est entraîné sur une tâche de classification binaire afin de prédire si une phrase $B$ est la véritable phrase suivante qui suit la phrase $A$ (IsNext) ou une phrase aléatoire du corpus (NotNext).
 
-BERT peut \^etre utilis\'e en fine-tuning end-to-end ou en approche \emph{feature-based} (extraction de caract\'eristiques). La Fig.~\ref{fig:bert_table} illustre des r\'esultats en NER o\`u la concat\'enation des quatre derni\`eres couches est comp\'etitive.
+\subsection{Stratégies d’application}
+
+Comme démontré dans les études d’ablation par Devlin et al., BERT peut être appliqué aux tâches en aval de deux manières : le \textit{fine-tuning}, où tous les paramètres sont mis à jour de bout en bout, et l’\textit{approche basée sur des caractéristiques}, où des caractéristiques fixes sont extraites de couches spécifiques.
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=0.85\linewidth]{images/Q6/bert_ner_table.jpg}
-  \caption{Approche feature-based sur CoNLL-2003 NER.}
+  \caption{Résultats de l’approche basée sur des caractéristiques sur CoNLL-2003 NER.}
   \label{fig:bert_table}
 \end{figure}
+
+Les résultats expérimentaux montrés à la Fig. \ref{fig:bert_table} indiquent que la concaténation des représentations de tokens provenant des quatre couches cachées supérieures donne des performances compétitives avec le fine-tuning (96.1 F1 vs 96.4 F1). Dans notre cadre théorique, cela justifie l’utilisation d’embeddings extraits comme entrées robustes pour des classifieurs en aval.

@@ -1,42 +1,39 @@
-\section{Q0---Analyse du jeu de donn\'ees avec des mod\`eles classiques d'apprentissage automatique}
+\section{Q0-Analyse du jeu de données avec différents modèles classiques d’apprentissage automatique}
+Le jeu de données Sentiment Data Analysis auquel l’accès est disponible est composé d’ensembles de tweets courts en anglais qui sont classés en trois catégories selon leur polarité comme positifs, neutres ou négatifs dans la colonne ``sentiment''. En outre, il existe des informations liées aux métadonnées des tweets en termes du moment de la journée où ils ont été publiés, de l’âge de l’utilisateur et de son pays d’origine dans les colonnes ``Age of User'' et ``country''.
 
-Le jeu de donn\'ees \emph{Sentiment Data Analysis} est compos\'e de courts tweets en anglais, class\'es en trois cat\'egories selon leur polarit\'e : positif, neutre ou n\'egatif (colonne \texttt{sentiment}). Des m\'etadonn\'ees sont \'egalement disponibles : le moment de la journ\'ee de publication, l'\^age de l'utilisateur, et son pays d'origine (colonnes \texttt{Age of User} et \texttt{country}).
+Il est initialement proposé d’effectuer un prétraitement du champ texte, en commençant par la suppression des valeurs nulles puis, en utilisant NLTK, en supprimant les stopwords, ce qui permet d’obtenir la colonne de texte traité sans des mots très fréquents en anglais qui n’ont pas une contribution sémantique significative \cite{b4}.
 
-Un pr\'etraitement du champ texte est d'abord effectu\'e : suppression des valeurs nulles, puis suppression des \emph{stopwords} avec NLTK, afin d'obtenir une colonne de texte trait\'e d\'ebarrass\'ee de mots tr\`es fr\'equents en anglais \`a faible contribution s\'emantique \cite{b4}.
+\subsection{Analyse exploratoire des données (EDA)}
 
-\subsection{Analyse exploratoire (EDA)}
-
-La distribution des classes dans l'ensemble d'entra\^{\i}nement est analys\'ee. Comme indiqu\'e en Fig.~\ref{fig:q0-eda}, la classe neutre est la plus repr\'esent\'ee, mais l'ensemble ne pr\'esente pas de d\'es\'equilibre substantiel susceptible d'induire un biais majeur des classifieurs.
-
+Une analyse de la distribution des classes dans les données d’entraînement est effectuée. Comme le montre la Fig. \ref{fig:q0-eda}, bien que la présence de données de polarité neutre dépasse les autres classes, il n’existe pas de déséquilibre substantiel dans le jeu de données d’entraînement qui pourrait être associé à un biais dans les classifieurs à développer.
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=\linewidth]{images/Q0/Distribution_of_sentiments.png}
-  \caption{Distribution des sentiments dans l'ensemble d'entra\^{\i}nement.}
+  \caption{Distribution des sentiments dans le jeu de données d’entraînement.}
   \label{fig:q0-eda}
 \end{figure}
 
-Avant d'appliquer des strat\'egies d'apprentissage automatique, il est utile d'examiner le comportement des termes (sac de mots) vis-\`a-vis des classes de polarit\'e, notamment via une analyse de fr\'equence.
+Il est utile, avant de mettre en œuvre certaines stratégies d’apprentissage automatique, d’examiner le comportement de groupes de termes (bag-of-words) vis-à-vis des classes de polarité, principalement d’un point de vue basé sur la fréquence. 
 
-Cela met en \'evidence le r\^ole d'un \emph{vectorizer}, responsable de la conversion d'une collection de textes (telle que la colonne de texte trait\'e) en vecteurs num\'eriques. Le r\'esultat est une repr\'esentation creuse (sparse) par document, appel\'ee \emph{vectorisation}. Selon la construction de cette matrice, plusieurs approches sont possibles. Ici, trois familles sont consid\'er\'ees : BoW (Bag of Words), TF--IDF, et TF--IDF caract\`eres \cite{b5}.
-
+Cela met en évidence l’importance du concept de vectoriseur, qui est responsable de la conversion de collections de textes—telles que le contenu de la colonne ``processed text''—en vecteurs numériques. Cela implique l’obtention d’une représentation creuse de chaque document après application du vectoriseur. Ce processus est précisément connu sous le nom de vectorisation et, selon la manière dont la représentation numérique est construite dans la matrice creuse, il peut être classé en plusieurs types. Dans ce travail, les approches suivantes sont considérées : BoW (Bag of Words), TF--IDF et Char TF--IDF \cite{b5}.
 \begin{itemize}
-\item \textbf{BoW.} Repr\'esente un document par l'occurrence des mots en n-grammes, en ignorant leur position. Un vocabulaire est construit, puis chaque document est encod\'e par des comptes. Dans scikit-learn, \texttt{CountVectorizer} ``convertit une collection de documents texte en une matrice de comptes de tokens'' \cite{b5}.
+\item \textbf{BoW.} Représente un document par l’occurrence de mots en n-grammes, en ignorant les positions qu’ils occupent dans le document. Il construit un dictionnaire/vocabulaire à partir des mots du corpus, attribue un indice à chaque terme, puis compte combien de fois chaque mot apparaît dans le document, en stockant ces comptes dans le vecteur du document. Dans scikit-learn, ceci est implémenté par \texttt{CountVectorizer}, qui ``convertit une collection de documents textuels en une matrice de comptes de tokens'' \cite{b5}.
 
-\item \textbf{TF--IDF.} Produit une matrice creuse comme BoW, mais pond\`ere les termes par une fr\'equence inverse de document (IDF) afin de p\'enaliser les termes tr\`es fr\'equents \cite{b5}. Le poids TF--IDF d'un terme $t$ dans un document $d$ est donn\'e par l'Eq.~(\ref{eq:tfidf}), avec $\mathrm{tf}(t,d)$ la fr\'equence du terme dans $d$ et $\mathrm{idf}(t)$ une pond\'eration li\'ee \`a sa diffusion dans le corpus.
+\item \textbf{TF--IDF.} Part d’un principe similaire à BoW dans le sens où il produit également une représentation sous forme de matrice creuse ; cependant, au lieu de ne s’appuyer que sur des comptages bruts de fréquence, il incorpore le terme d’inverse document frequency (IDF), qui pénalise les termes apparaissant dans de nombreux documents \cite{b5}. Conceptuellement, le poids TF--IDF d’un terme $t$ dans un document $d$ est calculé comme dans l’Eq.~(\ref{eq:tfidf}), où $\mathrm{tf}(t,d)$ correspond à la fréquence (brute) du terme dans $d$, et $\mathrm{idf}(t)$ attribue des poids plus faibles aux termes largement distribués dans le corpus.
 
 \begin{equation}
 \mathrm{tfidf}(t,d) = \mathrm{tf}(t,d)\times \mathrm{idf}(t).
 \label{eq:tfidf}
 \end{equation}
 
-En pratique, une version liss\'ee de l'IDF est souvent utilis\'ee, Eq.~(\ref{eq:idf}), o\`u $n$ est le nombre total de documents et $\mathrm{df}(t)$ le nombre de documents contenant $t$.
+En pratique (et comme implémenté dans des bibliothèques courantes telles que scikit-learn), une version lissée de l’IDF est typiquement utilisée, définie dans l’Eq.~(\ref{eq:idf}), où $n$ est le nombre total de documents dans le corpus et $\mathrm{df}(t)$ est le nombre de documents contenant le terme $t$.
 
 \begin{equation}
 \mathrm{idf}(t)=\log\left(\frac{1+n}{1+\mathrm{df}(t)}\right)+1.
 \label{eq:idf}
 \end{equation}
 
-Enfin, une normalisation par document stabilise l'\'echelle des caract\'eristiques. Une normalisation $\ell_2$ est consid\'er\'ee, Eq.~(\ref{eq:l2norm}), o\`u $\mathbf{v}$ est le vecteur TF--IDF d'un document.
+Enfin, après le calcul de TF--IDF, il est courant de normaliser chaque vecteur de document afin de contrôler les différences de longueur des documents et de stabiliser l’échelle des caractéristiques. Dans ce travail, la normalisation $\ell_2$ est considérée, comme le montre l’Eq.~(\ref{eq:l2norm}), où $\mathbf{v}$ désigne le vecteur TF--IDF d’un document.
 
 \begin{equation}
 \mathbf{v}_{\mathrm{norm}}=\frac{\mathbf{v}}{\lVert \mathbf{v} \rVert_2}
@@ -44,87 +41,100 @@ Enfin, une normalisation par document stabilise l'\'echelle des caract\'eristiqu
 \label{eq:l2norm}
 \end{equation}
 
-\item \textbf{TF--IDF caract\`eres.} Applique TF--IDF \`a des n-grammes de caract\`eres plut\^ot que de mots, contr\^ol\'e dans scikit-learn via le param\`etre \texttt{analyzer} \cite{b6}.
+\item \textbf{Char--IDF.} Consiste à appliquer TF--IDF sur des n-grammes de caractères plutôt que sur des n-grammes de mots, ce qui, dans scikit-learn, peut être contrôlé via le paramètre \texttt{analyzer} du vectoriseur\cite{b6}.
 \end{itemize}
 
-Apr\`es d\'efinition des repr\'esentations, BoW est utilis\'e pour extraire les 20 uni-grammes et bi-grammes les plus fr\'equents. Pour TF--IDF, l'objectif est d'afficher les 20 uni-grammes et bi-grammes de poids maximal. Les n-grammes de caract\`eres ne sont pas utilis\'es \`a cette \'etape car ils sont moins interpr\'etables pour l'analyse vis\'ee.
+Après avoir défini les schémas de représentation vectorielle des documents, il est proposé d’utiliser BoW pour extraire les 20 monogrammes et bigrammes les plus fréquents au sein de l’ensemble d’entraînement. Dans le cas de TF--IDF, l’objectif est d’afficher les 20 monogrammes et bigrammes avec les poids les plus élevés dans le jeu de données d’entraînement. L’utilisation de n-grammes de caractères n’est pas proposée pour cette étape car, en ne formant pas de mots complets, les caractéristiques résultantes sont moins intelligibles pour l’analyse visée.
+
+
 
 \begin{figure}[!ht]
   \centering
-  \subfloat[Monogrammes]{
+  \subfloat[Monograms]{
     \includegraphics[width=0.9\linewidth]{images/Q0/top20monogramsBoW.png}
     \label{fig:q0-bow-uni}}
   \hfill
   \subfloat[Bigrams]{
     \includegraphics[width=0.9\linewidth]{images/Q0/top20bigramsBoW.png}
     \label{fig:q0-bow-bi}}
-  \caption{Top 20 n-grammes avec BoW.}
+  \caption{Top 20 n-gramas avec BoW.}
   \label{fig:q0-bow}
 \end{figure}
 
 \begin{figure}[!ht]
   \centering
-  \subfloat[Monogrammes]{
+  \subfloat[Monograms]{
     \includegraphics[width=0.9\linewidth]{images/Q0/top20monogramstidf.png}
     \label{fig:q0-tfidf-uni}}
   \hfill
   \subfloat[Bigrams]{
     \includegraphics[width=0.9\linewidth]{images/Q0/top20bigramstidf.png}
+
     \label{fig:q0-tfidf-bi}}
-  \caption{Top 20 n-grammes avec TF--IDF.}
+  \caption{Top 20 n-gramas avec TF--IDF.}
   \label{fig:q0-tfidf}
 \end{figure}
 
-L'analyse des r\'esultats des Figs.~\ref{fig:q0-bow}--\ref{fig:q0-tfidf} montre que certains n-grammes sont coh\'erents avec la polarit\'e associ\'ee (par exemple \emph{bad} ou \emph{sorry} pour la classe n\'egative). N\'eanmoins, ces approches \'etant purement statistiques, des termes fr\'equents \`a faible valeur discriminante (ex. \emph{it}) peuvent aussi appara\^{\i}tre. De plus, certains bigrammes a priori neutres (ex. \emph{feels like}) deviennent repr\'esentatifs en raison du contexte de collecte. Cela anticipe une limite des vectorisations par fr\'equence par rapport \`a des embeddings contextualis\'es.
+En analysant les résultats présentés aux Figs. \ref{fig:q0-bow} - \ref{fig:q0-tfidf}, on peut observer que certains n-grammes apparaissant sous les deux méthodes correspondent à des mots qui, dans l’usage courant de la langue, sont communément associés à la classe de polarité dans laquelle ils deviennent les plus représentatifs. C’est le cas du unigramme \emph{bad} ou \emph{sorry} dans la classe de polarité négative, qui apparaît parmi les principaux termes pour les deux méthodes de vectorisation. Néanmoins, il est évident que, puisqu’il s’agit d’approches purement statistiques, des mots qui n’ont pas été retirés lors du prétraitement mais qui sont très fréquents en anglais—tels que \emph{it}—peuvent également apparaître. De même, certains bigrammes qu’un locuteur pourrait classifier comme neutres, mais qui deviennent fréquents en raison du contexte de collecte des données (par exemple, \emph{feels like}), apparaissent parmi les n-grammes les plus représentatifs à travers plusieurs classes. Cela anticipe l’un des effets abordés dans des étapes ultérieures : l’entraînement de modèles utilisant des vectorisations basées sur la fréquence, plutôt que des embeddings qui incorporent une information sémantique dans la représentation vectorielle creuse des documents.
 
-Il est \'egalement utile de v\'erifier si des variables secondaires (\'age, type de tweet, moment de la journ\'ee) ont un lien avec la polarit\'e. Les distributions (Fig.~\ref{fig:q0-sbuubtt}) restent proches d'une cat\'egorie \`a l'autre ; ces variables ne sont donc pas retenues pour l'entra\^{\i}nement.
+En plus de la colonne de texte traité, qui constitue le focus principal de ce travail, il est intéressant de déterminer si certaines des autres colonnes du jeu de données présentent une relation avec la classification de sentiment. À cette fin, les distributions de classes sont analysées en fonction de l’âge de l’utilisateur et du moment de la journée où le tweet est publié, comme le montre la Fig. \ref{fig:q0-sbuubtt} Cependant, la distribution des classes pour ces variables catégorielles reste très similaire à travers leurs domaines respectifs dans les deux cas ; par conséquent, elles ne sont pas considérées comme pertinentes pour l’entraînement du modèle de classification de sentiment.
 
 \begin{figure}[!ht]
+
   \centering
-  \subfloat[Sentiments par utilisateur]{
+  \subfloat[Sentiments by User]{
     \includegraphics[width=0.9\linewidth]{images/Q0/sentimentsbyuser.png}
     \label{fig:q0-sbu}}
   \hfill
-  \subfloat[Sentiments par type de tweet]{
+  \subfloat[Sentiments by type of tweet]{
     \includegraphics[width=0.9\linewidth]{images/Q0/sentimentbytypeoftweet.png}
     \label{fig:q0-sbtt}}
-  \caption{Distribution comparative des sentiments, stratifi\'ee par utilisateur et type de tweet.}
+  \caption{Distribution comparative des sentiments par catégorie, stratifiée par utilisateur et type de tweet}
   \label{fig:q0-sbuubtt}
 \end{figure}
 
-Concernant le pays, la Fig.~\ref{fig:q0-dcountry} pr\'esente les pays les plus fr\'equents. Les diff\'erences de distribution restent modestes et de nombreux pays sont faiblement repr\'esent\'es, ce qui peut introduire des caract\'eristiques rares et un risque de sur-apprentissage. Cette colonne n'est donc pas retenue.
+Dans le cas du pays dans lequel le tweet est publié, une distribution des pays avec le plus grand nombre de publications est analysée à la Fig. \ref{fig:q0-dcountry}. On observe que les comptes de tweets ne varient pas de manière fortement représentative entre eux et, bien que les distributions de classes soient légèrement différentes selon les pays, cette caractéristique n’est pas incluse dans les étapes ultérieures. Une raison est que le modèle peut ``mémoriser'' des motifs spécifiques aux pays qui ne se vérifient pas en dehors du jeu de données ou qui changent au cours du temps. De plus, compte tenu de la forme de la distribution par pays, de nombreux pays n’ont qu’un petit nombre d’exemples, ce qui génère des caractéristiques rares et augmente la probabilité de surapprentissage. Pour ces raisons, cette colonne n’est finalement pas incluse dans l’analyse.
+
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=\linewidth]{images/Q0/sentimentbycountry.png}
-  \caption{Distribution des sentiments pour les 10 pays les plus repr\'esent\'es.}
+  \caption{Distribution des sentiments dans les 10 principaux pays.}
   \label{fig:q0-dcountry}
 \end{figure}
-
-Enfin, la longueur du texte pr\'etrait\'e est examin\'ee (Fig.~\ref{fig:q0-wordcount}). Les distributions par classe sont comparables ; cette variable n'est pas retenue.
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=\linewidth]{images/Q0/wordcountsentiment.png}
-  \caption{Distribution du nombre de mots par sentiment.}
+  \caption{Distribution du nombre de mots par sentiment}
   \label{fig:q0-wordcount}
 \end{figure}
 
-\subsection{Entra\^{\i}nement de mod\`eles classiques}
+Enfin, en tant que dernière analyse du jeu de données, il est proposé d’examiner si la longueur du texte prétraité a une relation avec la classe, et donc s’il pourrait être utile de l’inclure comme variable durant l’entraînement des modèles de classification. Cependant, comme le montre la Fig. \ref{fig:q0-wordcount}, la distribution du nombre de mots par message pour chaque classe est comparable (ou effectivement équivalente). Pour cette raison, cette variable n’est pas non plus considérée comme pertinente pour l’objectif des modèles construits à l’étape suivante.
 
-Apr\`es l'analyse pr\'ec\'edente, des mod\`eles supervis\'es classiques (hors deep learning) sont entra\^{\i}n\'es pour classer chaque message en trois polarit\'es. Ces mod\`eles s'appuient sur une repr\'esentation explicite obtenue via un vectorizer : repr\'esentation du document, apprentissage du classifieur, \'evaluation \cite{b7}.
+\subsection{Entraînement de modèles classiques}
 
-Pour chaque sch\'ema de repr\'esentation, quatre classifieurs sont consid\'er\'es : Multinomial Naive Bayes, r\'egression logistique, SVM lin\'eaire, et Random Forest. Une recherche d'hyperparam\`etres est effectu\'ee sur un pipeline \emph{vectorizer + mod\`ele}, \'evalu\'ee via validation crois\'ee stratifi\'ee. La meilleure configuration (selon une m\'etrique cible) est ensuite r\'eentra\^{\i}n\'ee sur l'ensemble complet d'entra\^{\i}nement.
+Après l’analyse et la description du jeu de données présentées dans la section précédente, il est proposé d’implémenter des modèles traditionnels d’apprentissage automatique permettant de classer des messages textuels reçus et traités dans chacune des trois catégories de polarité (sentiment). Dans ce travail, le concept de modèles classiques d’apprentissage automatique renvoie à des approches supervisées qui ne relèvent pas du deep learning et ne s’appuient pas sur des Transformers ou des embeddings ; à la place, ils opèrent sur une représentation explicite du texte obtenue à partir de l’effet de l’un des vectoriseurs mentionnés précédemment. Cela permet de suivre le workflow : représentation du document, entraînement du classifieur, évaluation \cite{b7}.
 
-Les hyperparam\`etres principaux des vectorizers sont :
-\texttt{ngram\_range} (tailles de n-grammes), \texttt{min\_df} (seuil minimal de fr\'equence documentaire), \texttt{max\_df} (seuil maximal), et \texttt{max\_features} (limite de vocabulaire). Cette limite est particuli\`erement importante pour la TF--IDF caract\`eres afin de contr\^oler la dimension et le co\^ut.
+Dans ce cadre, et compte tenu de la variabilité associée à chacun des vectoriseurs décrits précédemment, il est proposé que, pour chaque représentation de texte, un ensemble de classifieurs soit entraîné en utilisant des algorithmes classiques d’apprentissage automatique : Multinomial Naive Bayes, Régression Logistique, Support Vector Machine et Random Forest. Cependant, étant donné la variabilité des hyperparamètres associés à chaque classifieur et au vectoriseur lui-même, une recherche d’hyperparamètres est réalisée sur un pipeline composé du vectoriseur et du modèle sélectionné, et évaluée via une validation croisée stratifiée. L’approche compare la performance obtenue pour chaque configuration candidate d’hyperparamètres à travers les folds de validation croisée, et sélectionne la configuration qui maximise une métrique choisie. Enfin, le pipeline le plus performant est réentraîné sur l’ensemble d’entraînement complet en utilisant le réglage d’hyperparamètres sélectionné.
 
-Les hyperparam\`etres des mod\`eles sont sp\'ecifiques et r\'esum\'es ci-dessous :
+Afin de décrire adéquatement le fonctionnement de l’algorithme d’entraînement employé, il est d’abord proposé de détailler l’influence de chacun des hyperparamètres considérés pour chaque élément du pipeline, tant dans le cas des vectoriseurs que dans le cas des modèles entraînés.
+
+Il est opportun de commencer par les hyperparamètres associés au vectoriseur au sein du pipeline. Le premier d’entre eux est \texttt{ngram\_range}, qui est un paramètre défini comme un tableau de tuples indiquant la taille des n-grammes pris en compte dans la construction de la représentation vectorielle. Ces n-grammes correspondent à des mots dans le cas de BoW, à des n-grammes de mots dans le cas du TF--IDF au niveau des mots, et à des n-grammes de caractères dans le cas du TF--IDF au niveau des caractères. Le paramètre \texttt{min\_df}, à son tour, contient un ensemble de seuils minimaux à évaluer pour le critère de document-frequency, c’est-à-dire le nombre minimum de documents dans lesquels un n-gramme doit apparaître afin d’être considéré. Ceci est utile pour retirer des termes très rares de la représentation. Le paramètre \texttt{max\_df} spécifie la fréquence documentaire maximale qu’un n-gramme peut avoir pour être inclus dans la vectorisation, ce qui est utile pour retirer des n-grammes trop fréquents et fournissant donc une information discriminante limitée. Enfin, \texttt{max\_features} contient un ensemble de valeurs candidates, où chaque valeur correspond à une limite sur le nombre de caractéristiques testée durant la phase de recherche d’hyperparamètres afin de contraindre la taille du vocabulaire, principalement en fonction de la fréquence et du coût computationnel. Cette limitation est particulièrement importante pour adapter l’entraînement des réseaux neuronaux précédés d’une vectorisation au niveau des caractères dans la Question Q2, comme cela sera détaillé plus tard.
+
+D’autre part, les hyperparamètres associés à chaque modèle sont spécifiques à chaque algorithme, selon sa nature et sa formulation mathématique, et ils sont décrits ci-dessous :
+
 \begin{itemize}
-\item \textbf{Multinomial Naive Bayes} : \texttt{alpha} (lissage additif) pour \'eviter des probabilit\'es nulles \cite{b8}.
-\item \textbf{R\'egression logistique} : \texttt{C} (inverse de la r\'egularisation), \texttt{penalty}, \texttt{solver}, \texttt{max\_iter} \cite{b9}.
-\item \textbf{SVM lin\'eaire} : \texttt{C}, \texttt{estimator\_\_loss}, \texttt{max\_iter}. Le classifieur est calibr\'e via \texttt{CalibratedClassifierCV} afin d'obtenir des probabilit\'es de classe \cite{b11}.
-\item \textbf{Random Forest} : \texttt{n\_estimators}, \texttt{max\_depth}, \texttt{min\_samples\_split}, \texttt{class\_weight} \cite{b12}.
+\item \textbf{Multinomial Naive Bayes} \texttt{alpha} est un paramètre de lissage additif dont l’objectif principal est d’éviter des probabilités nulles dans le cas où une caractéristique n’apparaît pas dans les données d’entraînement. Rappelons que Naive Bayes est formulé comme un produit de probabilités conditionnelles sous une hypothèse d’indépendance ; dans ce contexte, le lissage fonctionne en augmentant artificiellement les comptes observés de la valeur $\alpha$ \cite{b8}.
+
+\item \textbf{Régression Logistique} \texttt{C} est un paramètre qui représente l’inverse de la force de régularisation : des valeurs plus petites impliquent une régularisation plus forte et, par conséquent, un risque plus faible de surapprentissage, tandis que des valeurs plus grandes impliquent une régularisation plus faible et un modèle avec davantage de liberté dans ses paramètres. L’option \texttt{penalty} définit le type de régularisation appliqué par le modèle : $L1$ pénalise la somme des valeurs absolues des coefficients, tandis que $L2$ pénalise la somme des carrés des coefficients, ce qui tend à réduire les poids plus en douceur et n’encourage pas explicitement des solutions creuses où certains coefficients deviennent exactement nuls. Le paramètre \texttt{solver} se réfère à l’algorithme d’optimisation utilisé durant l’entraînement, et \texttt{max\_iter} indique le nombre maximal d’itérations autorisées pour que le solveur converge \cite{b9}.
+
+\item \textbf{Support vector machine} Le paramètre \texttt{C} agit comme l’inverse de la force de régularisation. L’hyperparamètre \texttt{estimator\_\_loss} est utilisé pour définir la fonction de loss du SVM linéaire. Un paramètre \texttt{max\_iter} est également inclus afin de définir le nombre maximal d’itérations autorisées pour la convergencec. De plus, le SVM est encapsulé dans \texttt{CalibratedClassifierCV}, qui convertit la sortie du Support Vector Machine en probabilités de classe, rendant les prédictions plus interprétables et, par conséquent, plus adaptées à la procédure d’ajustement d’hyperparamètres du pipeline \cite{b11}.
+
+\item \textbf{Random forest} \texttt{n\_estimators} spécifie le nombre d’arbres (estimateurs) entraînés dans la forêt. Le paramètre \texttt{max\_depth} définit la profondeur maximale de chaque arbre ; lorsqu’il est fixé à \texttt{None}, l’arbre est autorisé à croître jusqu’à ce que ses feuilles satisfassent au critère d’arrêt défini par \texttt{min\_samples\_leaf}. En revanche, lorsqu’une valeur finie est utilisée, le nombre de niveaux de l’arbre est restreint, réduisant le nombre de nœuds et agissant comme un mécanisme de régularisation pouvant diminuer le risque de surapprentissage. Le paramètre \texttt{min\_samples\_split} définit le nombre minimum d’échantillons requis pour scinder un nœud interne ; il peut également être utilisé pour contrôler le surapprentissage et peut donc avoir un effet de régularisation. Enfin, \texttt{class\_weight} est utilisé pour définir des poids de classe durant l’entraînement : \texttt{None} utilise des poids égaux, tandis que \texttt{balanced} ajuste les poids en fonction des fréquences des classes dans les données d’entraînement afin de contrebalancer un déséquilibre de classes \cite{b12}.
+
 \end{itemize}
 
-Une grille est construite, la performance est estim\'ee via validation crois\'ee \`a 5 plis, puis la meilleure configuration est r\'eentra\^{\i}n\'ee sur l'ensemble complet. Les r\'esultats et leur discussion sont pr\'esent\'es en Q1.
+Avec l’ensemble de paramètres définis et un pipeline spécifique composé d’un vectoriseur et d’un modèle d’apprentissage supervisé, une grille de paramètres est construite. À partir de cette grille, les combinaisons candidates sont énumérées et la performance de chaque combinaison est estimée via une validation croisée en 5 folds, en agrégeant les métriques à travers les folds afin d’obtenir une représentation plus robuste de l’estimation du modèle. Une fois que l’algorithme de recherche sur grille identifie une configuration optimale, le pipeline sélectionné est réentraîné sur l’ensemble d’entraînement complet. Il convient de souligner que cette conception inclut également la possibilité d’activer ou non le parallélisme à chaque exécution de l’algorithme d’entraînement, selon les exigences spécifiques de chaque exécution du processus d’entraînement.
+
+Après avoir conclu l’analyse de la méthode, l’entraînement de tous les pipelines composés des vectoriseurs et des modèles référencés est proposé en utilisant l’algorithme de recherche d’hyperparamètres, et les résultats de ce processus sont discutés dans la section suivante.

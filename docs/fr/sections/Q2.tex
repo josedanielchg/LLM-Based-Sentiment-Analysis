@@ -1,48 +1,139 @@
-\section{Q2---Architectures MLP pour la classification de sentiment de textes courts}
+\section{Q2-Architectures MLP pour la classification de sentiment de textes courts}
 
-Cette section \'etudie des architectures de perceptron multicouche (MLP) afin d'identifier efficacement la polarit\'e de courts textes en anglais. Le pipeline consid\'er\'e comprend : (i) une repr\'esentation (vectorisation) du texte ; (ii) la construction d'un \texttt{Dataset}/\texttt{DataLoader} ; (iii) l'entra\^{\i}nement d'un MLP ; puis (iv) l'\'evaluation.
+Dans cette section, il est proposé d’employer des architectures de perceptron multicouche (MLP) pour entraîner des classifieurs qui identifient efficacement la polarité dans des textes courts en anglais. Afin de définir la structure et le processus d’entraînement de l’ensemble des MLP mis en œuvre, il est proposé de discuter d’abord du pipeline concret qui permet d’obtenir une classification finale.
 
-Le premier \'el\'ement du pipeline est le vectorizer (BoW, TF--IDF mot, ou TF--IDF caract\`ere). Les hyperparam\`etres retenus pour chaque vectorizer correspondent \`a la meilleure configuration observ\'ee dans la grille associ\'ee \`a ce vectorizer au stade Q1.
+Le premier élément du pipeline est le vectoriseur, qui peut être de l’un des trois types considérés précédemment. Afin de définir les hyperparamètres de chaque vectoriseur, le réglage d’hyperparamètres associé au vectoriseur est sélectionné à partir de la grille de paramètres du pipeline le plus performant qui inclut ce vectoriseur spécifique.
 
-Pour BoW et TF--IDF mot, le nombre de caract\'eristiques est de 6689. Pour TF--IDF caract\`eres, le nombre de caract\'eristiques d\'epasse 100{,}000 si aucune limite n'est impos\'ee. Afin de garder une dimension comparable et de rendre l'entra\^{\i}nement tractable, la configuration TF--IDF caract\`eres est conserv\'ee, mais \texttt{max\_features} est fix\'e \`a 10{,}000. Cela permet de comparer des architectures MLP \'equivalentes (m\^emes profondeurs et t\^etes), en ne modifiant que la dimension d'entr\'ee.
+Dans le cas des vectoriseurs sélectionnés pour le TF--IDF au niveau des mots et BoW, le nombre de caractéristiques résultantes est de 6689. Cependant, pour le TF--IDF au niveau des caractères, comme attendu compte tenu de la définition de ses n-grammes, le nombre de caractéristiques dépasse 100{,}000 lorsqu’aucune limite explicite n’est imposée. Cela rend l’entraînement d’un MLP dans ce pipeline significativement plus coûteux en termes de GPU et de RAM, et cela exigerait également de définir des structures de réseau différentes de celles utilisées avec les autres vectoriseurs. Pour cette raison, la configuration d’hyperparamètres la plus performante pour le vectoriseur TF--IDF au niveau des caractères est conservée, mais son nombre de caractéristiques est restreint à 10{,}000 afin que sa dimensionnalité soit comparable à celle des autres vectoriseurs. Cela permet d’implémenter des structures MLP équivalentes à travers les pipelines, ne différant que par la dimension d’entrée de la première couche tout en conservant le même nombre de couches cachées, d’une manière qui reste cohérente.
 
-La matrice creuse produite par le vectorizer est convertie en format CSR, puis utilis\'ee via un \texttt{SparseBoWDataset} \cite{b13}. Un \texttt{DataLoader} PyTorch it\`ere ensuite sur l'ensemble d'entra\^{\i}nement ; les \'echantillons sont m\'elang\'es \`a chaque \'epoque. La fonction \texttt{collate} densifie les lots et retourne un dictionnaire \{\texttt{"x"}: \texttt{X\_batch}, \texttt{"label"}: \texttt{y\_batch}\} directement utilisable pour le passage avant et le calcul de la perte \cite{b14}.
+L’élément suivant du pipeline est le MLP utilisé pour la classification ; toutefois, plusieurs composants sont nécessaires pour son entraînement et pour définir sa structure. Le premier d’entre eux est un objet qui convertit la matrice creuse produite par le vectoriseur en une matrice au format Compressed Sparse Row (CSR), permettant un accès efficace ligne par ligne, à savoir \texttt{SparseBoWDataset} \cite{b13}.
 
-\subsection{Architectures MLP propos\'ees (repr\'esentations creuses)}
-Afin de respecter les contraintes d'entr\'ee et l'objectif de classification \`a trois classes, quatre r\'eseaux de profondeur mod\'er\'ee (3--4 couches cach\'ees) sont propos\'es. La profondeur est limit\'ee car les repr\'esentations BoW/TF--IDF condensent d\'ej\`a une partie de l'information discriminante au niveau des caract\'eristiques ; augmenter excessivement la profondeur tend \`a accro\^{\i}tre la variance et le risque de sur-apprentissage, sans gain proportionnel en g\'en\'eralisation.
+Cette matrice CSR est ensuite utilisée pour construire un \texttt{DataLoader}, un itérateur PyTorch qui, à chaque époque d’entraînement, parcourt l’ensemble d’entraînement et fournit un batch d’échantillons par itération. Avant chaque époque, les échantillons sont mélangés afin de réduire le risque de biais dû à des effets d’ordre. Dans cette configuration, \texttt{collate} agit comme la fonction qui convertit les matrices creuses des batches en matrices denses puis en tenseurs PyTorch, renvoyant un dictionnaire de la forme \{\texttt{"x"}: \texttt{X\_batch}, \texttt{"label"}: \texttt{y\_batch}\}, qui est directement utilisable pour le forward pass et pour le calcul de la loss \cite{b14}.
 
-Les diff\'erences entre architectures portent principalement sur : (i) des structures en entonnoir (funnel) ; et (ii) le degr\'e de r\'egularisation via dropout.
+Après avoir défini ces composants, la discussion peut être complétée concernant la structure de réseau de neurones proposée à mettre en œuvre. Afin d’obtenir un modèle qui satisfasse à la fois les exigences d’entrée et la tâche de classification en sortie, un ensemble de quatre réseaux modérément profonds est proposé (3 ou 4 couches cachées), tout en maintenant une tête de sortie commune pour la classification finale à trois classes. La décision de limiter la profondeur est motivée par le fait que les représentations d’entrée (BoW/TF--IDF/char ou TF--IDF ) condensent déjà une grande partie de l’information discriminante au niveau des caractéristiques ; par conséquent, augmenter excessivement le nombre de couches peut accroître la variance du modèle et favoriser le surapprentissage sans gain proportionnel en généralisation.
 
-La taille d'entr\'ee d\'epend du vectorizer : 6689 pour BoW/TF--IDF mot, et 10{,}000 pour TF--IDF caract\`eres. La taille de batch est fix\'ee \`a 128.
-
-% Les descriptions des couches sont laissées identiques à l’original (très techniques),
-% afin d’éviter toute perte d’information ou ambiguïté.
+De cette manière, les différences entre les structures de réseau proposées se concentrent sur deux éléments principaux dans la recherche d’une performance améliorée. Le premier est la modification des couches selon une architecture en forme d’entonnoir, et le second est l’ajustement de la stratégie de régularisation en faisant varier le dropout. Dans cette optique, il est proposé d’analyser plus en détail chacune des structures proposées et implémentées pour chaque type de vectorisation. De cette manière, les différences entre les structures de réseau proposées se concentrent sur deux éléments principaux dans la recherche d’une performance améliorée du réseau. Le premier est la modification des couches selon une architecture en forme d’entonnoir, et le second est l’ajustement de la stratégie de régularisation en faisant varier le dropout. Dans cette optique, il est proposé d’analyser plus en détail chacune des structures proposées et implémentées pour chaque type de vectorisation. Dans chaque cas, l’entrée du réseau est organisée sous forme d’une matrice dont la taille dépend de la taille de batch, définie de manière cohérente à travers tous les réseaux de neurones comme étant 128, et de la dimension d’entrée, qui correspond au nombre de caractéristiques produites par la méthode de vectorisation sélectionnée. Ainsi, pour les modèles basés sur des mots cette dimension est 6689, tandis que pour le modèle basé sur des caractères elle est 10{,}000.
 \begin{itemize}
-\item \textbf{MLP\_1024\_512\_256\_drop0\_3}
-\item \textbf{MLP\_2048\_1024\_512\_drop0\_2\_gelu}
+\item \textbf{MLP\_1024\_512\_256\_drop0\_3} 
+\begin{itemize}
+    \item \textbf{Couche d’entrée (reshape).}
+    \item \textbf{Couche 1} (\texttt{Linear} $\texttt{INPUT\_DIM} \rightarrow 1024$): transforme la représentation vectorielle en une représentation dense de 1024 unités.
+    \item \textbf{Activation 1}: ReLU.
+    \item \textbf{Régularisation 1}: Dropout ($p=0.3$).
+    \item \textbf{Couche 2} (\texttt{Linear} $1024 \rightarrow 512$): compresse la représentation à 512 unités.
+    \item \textbf{Activation 2}: ReLU.
+    \item \textbf{Régularisation 2}: Dropout ($p=0.3$).
+    \item \textbf{Couche 3} (\texttt{Linear} $512 \rightarrow 256$): réduit la représentation de 512 à 256 unités.
+    \item \textbf{Activation 3}: ReLU.
+    \item \textbf{Régularisation 3}: Dropout ($p=0.3$).
+    \item \textbf{Couche de sortie} (\texttt{Linear} $256 \rightarrow \texttt{NUM\_CLASSES}$): projette la représentation finale vers 3 classes, correspondant aux catégories de sentiment/polarité des messages courts et, par conséquent, à la décision de classe.
+\end{itemize}
+\item \textbf{MLP\_2048\_1024\_512\_drop0\_2\_gelu} 
+  \begin{itemize}
+    \item \textbf{Couche d’entrée (reshape).}
+    \item \textbf{Couche 1} (\texttt{Linear} $\texttt{INPUT\_DIM} \rightarrow 2048$): projette l’entrée vectorisée dans un espace de dimension 2048, augmentant la capacité à capturer des combinaisons de caractéristiques par rapport à la structure précédente.
+    \item \textbf{Activation 1}: GELU.
+    \item \textbf{Régularisation 1}: Dropout ($p=0.3$).
+    \item \textbf{Couche 2} (\texttt{Linear} $2048 \rightarrow 1024$): compression intermédiaire à 1024 unités.
+    \item \textbf{Activation 2}: GELU.
+    \item \textbf{Régularisation 2}: Dropout ($p=0.2$).
+    \item \textbf{Couche 3} (\texttt{Linear} $1024 \rightarrow 512$): compression supplémentaire vers un espace de dimension 512.
+    \item \textbf{Activation 3}: GELU.
+    \item \textbf{Régularisation 3}: Dropout ($p=0.2$).
+    \item \textbf{Couche de sortie} (\texttt{Linear} $512 \rightarrow \texttt{NUM\_CLASSES}$): produit les logits finaux.
+  \end{itemize}
 \item \textbf{MLP\_1536\_768\_384\_192\_drop0\_25\_SiLU}
+\begin{itemize}
+    \item \textbf{Couche d’entrée (reshape).}
+    \item \textbf{Couche 1} (\texttt{Linear} $\texttt{INPUT\_DIM} \rightarrow 1536$): projection initiale à 1536 unités, fournissant une capacité élevée sans atteindre l’expansion maximale de l’architecture précédente.
+    \item \textbf{Activation 1}: SiLU.
+    \item \textbf{Régularisation 1}: Dropout ($p=0.25$).
+    \item \textbf{Couche 2} (\texttt{Linear} $1536 \rightarrow 768$): réduction à 768 unités, consolidant les motifs appris.
+    \item \textbf{Activation 2}: SiLU.
+    \item \textbf{Régularisation 2}: Dropout ($p=0.25$).
+    \item \textbf{Couche 3} (\texttt{Linear} $768 \rightarrow 384$): réduction à 384 unités.
+    \item \textbf{Activation 3}: SiLU.
+    \item \textbf{Régularisation 3}: Dropout ($p=0.25$).
+    \item \textbf{Couche 4} (\texttt{Linear} $384 \rightarrow 192$): réduction finale à 192 unités, imposant une représentation compacte avant la couche de décision.
+    \item \textbf{Activation 4}: SiLU.
+    \item \textbf{Régularisation 4}: Dropout ($p=0.25$).
+    \item \textbf{Couche de sortie} (\texttt{Linear} $192 \rightarrow \texttt{NUM\_CLASSES}$): produit les logits.
+\end{itemize}
 \item \textbf{MLP\_4096\_2048\_1024\_drop0\_1\_ReLU}
+  \begin{itemize}
+    \item \textbf{Couche d’entrée (reshape).}
+    \item \textbf{Couche 1} (\texttt{Linear} $\texttt{INPUT\_DIM} \rightarrow 4096$): projection à haute capacité vers 4096 unités, cherchant à maximiser l’espace latent afin de combiner un plus grand nombre de caractéristiques.
+    \item \textbf{Activation 1}: ReLU.
+    \item \textbf{Régularisation 1}: Dropout ($p=0.1$).
+    \item \textbf{Couche 2} (\texttt{Linear} $4096 \rightarrow 2048$): compression à 2048 unités tout en maintenant une capacité élevée.
+    \item \textbf{Activation 2}: ReLU.
+    \item \textbf{Régularisation 2}: Dropout ($p=0.1$).
+    \item \textbf{Couche 3} (\texttt{Linear} $2048 \rightarrow 1024$): compression à 1024 unités comme représentation préalable à la sortie.
+    \item \textbf{Activation 3}: ReLU.
+    \item \textbf{Régularisation 3}: Dropout ($p=0.1$).
+    \item \textbf{Couche de sortie} (\texttt{Linear} $1024 \rightarrow \texttt{NUM\_CLASSES}$): produit les logits finaux pour la classification.
 \end{itemize}
 
-L'entra\^{\i}nement utilise une perte entropie crois\'ee. Chaque r\'eseau est entra\^{\i}n\'e jusqu'\`a 50 \'epoques, avec un crit\`ere d'arr\^et rapide \`a $1\times 10^{-4}$ bas\'e sur la variation de perte entre deux \'epoques cons\'ecutives. L'optimisation est effectu\'ee avec Adam, avec un \texttt{lr} identique entre architectures afin de conserver des conditions comparables.
+\end{itemize}
+Pour l’entraînement de tous les MLP proposés, le critère d’entropie croisée est employé. L’entraînement est effectué pendant 50 époques, avec un critère d’arrêt rapide de $1\times 10^{-4}$ basé sur la variation de la loss d’entraînement entre époques consécutives. De plus, un taux d’apprentissage \texttt{lr} est défini afin de contrôler la taille du pas des mises à jour de paramètres durant l’optimisation, réalisée au moyen de l’optimiseur Adam, indépendamment de l’architecture du réseau considérée. De cette manière, chaque réseau est entraîné séparément en minimisant la fonction de loss et en mettant à jour les poids via la méthode de descente de gradient stochastique adaptative Adam, permettant de comparer leurs performances dans des conditions d’entraînement équivalentes.
 
-\subsection{Motivation pour des embeddings contextualis\'es}
-Les vectorisations bas\'ees sur des fr\'equences fournissent une repr\'esentation sans information s\'emantique explicite : elles ne capturent que partiellement l'ordre et le contexte. Cela motive l'introduction d'une repr\'esentation dense incorporant le contexte via une tokenisation et un encodage par un mod\`ele de type BERT.
+L’entraînement est réalisé avec une boucle basée sur les époques, comme proposé dans le développement du cours. À chaque itération, le \texttt{train\_loader} (le DataLoader pour l’ensemble d’entraînement) fournit le dictionnaire d’entrée contenant les tenseurs et leurs labels, qui sont transférés sur le dispositif de calcul, en l’occurrence le GPU. Pour chaque batch, l’optimiseur est réinitialisé et la sortie du modèle est calculée, suivie de la valeur de loss correspondante en utilisant la loss d’entropie croisée, telle que définie précédemment. Ensuite, la rétropropagation est exécutée et les paramètres du modèle sont mis à jour via une étape d’optimiseur \texttt{Adam}. Cette procédure est appliquée jusqu’à 50 époques, sous réserve du critère d’arrêt anticipé, et le modèle entraîné est sauvegardé à la fin soit comme un objet en mémoire soit comme un fichier \texttt{.pt}.
 
-\subsection{Pipeline avec embeddings BERT}
-Changer de repr\'esentation implique d'adapter le \texttt{DataLoader} : au lieu de fournir des caract\'eristiques finales, il fournit des tenseurs tokenis\'es, car les embeddings sont produits \`a travers le passage avant de BERT. Dans ce cas, la fonction \texttt{collate} n'est pas requise, car le tokenizer produit des tenseurs de taille compatible. Le \texttt{DataLoader} retourne \texttt{"input\_ids"}, \texttt{"attention\_mask"} et \texttt{"label"} \cite{b15}.
+Compte tenu des choix de conception et d’entraînement décrits ci-dessus, ces modèles sont obtenus pour chacune des représentations vectorisées, et leurs résultats sont analysés plus tard. Toutefois, le point discuté précédemment reste pertinent : les méthodes de vectorisation basées sur la fréquence ne fournissent qu’une représentation dérivée d’une analyse fréquentielle du document, et elles ne prennent pas en compte des aspects tels que la position des tokens au sein du texte ou des considérations sémantiques. Cela motive la réflexion selon laquelle il peut être opportun d’implémenter une représentation vectorielle plus dense qui intègre cette information conceptuelle via la tokenisation des mots. Ainsi, l’utilisation d’embeddings BERT est considérée, et par conséquent l’évaluation de structures MLP au sein d’un pipeline dans lequel la première étape n’est pas une vectorisation basée sur la fréquence, mais plutôt une vectorisation basée sur des embeddings utilisant BERT. Les causes et les conséquences de cette implémentation sont discutées dans les sections spécifiques consacrées aux embeddings BERT, et en particulier en termes des implications qu’elle introduit par rapport à une approche basée sur du texte brut.
 
-Une fonction d'extraction d'embeddings ex\'ecute BERT en mode \'evaluation, puis applique un pooling pour obtenir un vecteur par texte. Les lots sont concat\'en\'es pour former une matrice dense. Cette matrice est standardis\'ee via \texttt{StandardScaler} (moyenne nulle, variance unit\'e sur train), afin de stabiliser l'entra\^{\i}nement et d'\'eviter qu'une dimension domine par sa variance \cite{b16}.
+Changer l’approche de vectorisation implique que les éléments utilisés pour entraîner les réseaux de neurones décrits précédemment, ainsi que la structure du réseau elle-même, doivent être modifiés. Pour cette raison, il est proposé de décrire d’abord le changement dans la structure du DataLoader, qui, contrairement au cas des vecteurs basés sur la fréquence, ne fournit plus les caractéristiques finales mais produit à la place du texte tokenisé, puisque les caractéristiques (embeddings) sont générées lorsque les tenseurs passent à travers BERT. Dans cette configuration, la fonction \texttt{collate} n’est pas appliquée parce que le tokenizer de BERT renvoie déjà des tenseurs de taille fixe, compatibles. Ainsi, le DataLoader fournit \texttt{"input\_ids"} + \texttt{"attention\_mask"} + \texttt{"label"}, et l’embedding est produit en faisant passer ces tenseurs à travers BERT \cite{b15}.
 
-\subsection{Architectures MLP au-dessus de BERT}
-Avec BERT, la dimension d'entr\'ee devient fixe et faible (768 pour BERT\textsubscript{BASE}). Les embeddings sont denses, contrairement aux vecteurs TF--IDF creux. La complexit\'e repr\'esentative est essentiellement port\'ee par l'encodeur (BERT), et la t\^ete de classification peut rester simple ; dans certains cas, une t\^ete lin\'eaire suffit \cite{b17}.
+Ce DataLoader est converti en embeddings via une fonction d’extraction d’embeddings, en réglant BERT en mode évaluation et en exécutant le forward pass. Après cela, un pooling est appliqué afin d’obtenir un seul vecteur par texte, et les batches résultants sont concaténés. La sortie finale est donc une matrice dense, qui est standardisée en utilisant un \texttt{StandardScaler} qui transforme chaque caractéristique de sorte que, sur l’ensemble d’entraînement, la moyenne soit nulle et l’écart-type soit un. Cela garantit que les dimensions de l’embedding ont une échelle comparable, ce qui améliore la stabilité de l’entraînement et empêche certaines dimensions d’avoir un effet dominant en raison d’une variance plus élevée \cite{b16}.
 
-Les architectures consid\'er\'ees sont :
+La sortie de l’étape de mise à l’échelle est convertie en un DataLoader pour le MLP comparable à celui utilisé lors de l’entraînement des méthodes basées sur un vectoriseur. Ce DataLoader construit des batches d’embeddings denses et leurs labels correspondants sous la forme \{\texttt{"x"}: \texttt{X\_batch}, \texttt{"label"}: \texttt{y\_batch}\}, qui sont ensuite utilisés pour l’entraînement du modèle et pour son évaluation de performance ultérieure.
+
+Compte tenu du processus de vectorisation basé sur des embeddings et du rôle des DataLoaders à ce stade avec BERT et le MLP, il est approprié de discuter des modifications générales dans la structure des modèles entraînés pour les pipelines qui utilisent des embeddings BERT. Le premier effet est que la dimension d’entrée change considérablement : elle passe de plus de 6000 caractéristiques d’entrée à une taille d’entrée beaucoup plus petite et fixe, qui dans le cas de base est 768. BERT produit une matrice de sortie dense contenant des activations à valeurs réelles dans presque toutes les dimensions, qui est stockée comme un vecteur dense ; à l’inverse, les vectorisations basées sur la fréquence produisent des représentations creuses avec de nombreux zéros. Cette différence implique que la conception du MLP doit contrôler la capacité (largeur et profondeur) en relation avec l’espace d’entrée : pour des entrées creuses, de grande dimension, la régularisation joue un rôle fondamental afin d’éviter des effets de mémorisation causés par un espace d’entrée très élevé en dimension et principalement vide. Dans le cas de BERT, l’entrée dense implique que la majeure partie de la complexité de représentation est prise en charge par le forward pass de BERT qui produit les embeddings, de sorte que la cartographie ultérieure de cet espace vectoriel informatif vers les classes cibles devient plus simple.
+
+De plus, lors de l’utilisation d’embeddings BERT, les transformations appliquées durant le forward pass encodent déjà des informations syntaxiques et sémantiques dans le vecteur selon les caractéristiques du modèle BERT utilisé, tandis que TF--IDF correspond à une représentation comparativement superficielle qui reflète principalement une analyse fréquentielle. Par conséquent, pour les pipelines dans lesquels BERT fournit l’entrée du MLP, la représentation est déjà hautement informative et la complexité requise du MLP diminue considérablement ; dans certains cas, même une tête linéaire est suffisante pour atteindre la performance attendue \cite{b17}. Compte tenu de ces conditions, les quatre architectures proposées pour les pipelines à embeddings BERT sont moins complexes, avec moins de couches et des largeurs plus faibles que celles utilisées dans les pipelines précédents, et elles sont les suivantes.
+
 \begin{enumerate}
-\item \textbf{LinearHead\_baseline (single linear layer)}
-\item \textbf{MLP\_256\_64\_drop0\_2}
-\item \textbf{MLP\_128\_32\_drop0\_2}
-\item \textbf{MLP\_512\_128\_drop0\_3}
+    \item \textbf{LinearHead\_baseline (une seule couche linéaire)}
+    \begin{itemize}
+        \item \textbf{Couche d’entrée (reshape).}
+        \item \textbf{Couche finale} (\texttt{Linear} $768 \rightarrow \texttt{NUM\_CLASSES}$): projette directement l’embedding de dimension 768 vers les 3 classes (sentiment/polarité), sans couches cachées ni activations intermédiaires.
+        \item \textbf{Sortie}: correspond à la décision finale de classe.
+    \end{itemize}
+
+    \item \textbf{MLP\_256\_64\_drop0\_2 }
+    \begin{itemize}
+        \item \textbf{Couche d’entrée (reshape).}
+        \item \textbf{Couche 1} (\texttt{Linear} $768 \rightarrow 256$): transforme la représentation d’entrée en 256 unités.
+        \item \textbf{Activation 1}: ReLU.
+        \item \textbf{Régularisation 1}: Dropout ($p=0.2$).
+        \item \textbf{Couche 2} (\texttt{Linear} $256 \rightarrow 64$): réduit/compresse la représentation à 64 unités.
+        \item \textbf{Activation 2}: ReLU.
+        \item \textbf{Régularisation 2}: Dropout ($p=0.2$).
+        \item \textbf{Couche de sortie} (\texttt{Linear} $64 \rightarrow \texttt{NUM\_CLASSES}$): projette la représentation finale vers 3 classes et définit la prédiction de polarité.
+    \end{itemize}
+
+    \item \textbf{MLP\_128\_32\_drop0\_2 }
+    \begin{itemize}
+        \item \textbf{Couche d’entrée (reshape).}
+        \item \textbf{Couche 1} (\texttt{Linear} $768 \rightarrow 128$): compresse la représentation vectorielle à 128 unités.
+        \item \textbf{Activation 1}: ReLU.
+        \item \textbf{Régularisation 1}: Dropout ($p=0.2$).
+        \item \textbf{Couche 2} (\texttt{Linear} $128 \rightarrow 32$): réduit la représentation à 32 unités afin d’extraire des motifs plus compacts.
+        \item \textbf{Activation 2}: ReLU.
+        \item \textbf{Régularisation 2}: Dropout ($p=0.2$).
+        \item \textbf{Couche de sortie} (\texttt{Linear} $32 \rightarrow \texttt{NUM\_CLASSES}$): projette la sortie vers les 3 classes de sentiment et correspond à la décision finale.
+    \end{itemize}
+
+    \item \textbf{MLP\_512\_128\_drop0\_3 }
+    \begin{itemize}
+        \item \textbf{Couche d’entrée (reshape).}
+        \item \textbf{Couche 1} (\texttt{Linear} $768 \rightarrow 512$): étend/transforme la représentation dans un espace dense de 512 unités afin de capturer des relations plus complexes.
+        \item \textbf{Activation 1}: ReLU.
+        \item \textbf{Régularisation 1}: Dropout ($p=0.3$).
+        \item \textbf{Couche 2} (\texttt{Linear} $512 \rightarrow 128$): compresse la représentation à 128 unités tout en préservant l’information la plus pertinente.
+        \item \textbf{Activation 2}: ReLU.
+        \item \textbf{Régularisation 2}: Dropout ($p=0.3$).
+        \item \textbf{Couche de sortie} (\texttt{Linear} $128 \rightarrow \texttt{NUM\_CLASSES}$): projette la représentation finale vers les 3 classes (sentiment/polarité) et définit la décision de classe.
+    \end{itemize}
 \end{enumerate}
 
-La perte et la proc\'edure d'entra\^{\i}nement restent identiques (entropie crois\'ee, Adam, 50 \'epoques max, arr\^et rapide), afin de conserver une comparaison coh\'erente. Les r\'esultats de l'ensemble des pipelines de cette section sont analys\'es en Q3.
+Pour l’entraînement, la loss d’entropie croisée est définie comme critère d’optimisation. De plus, un maximum de 50 époques d’entraînement est proposé, avec un critère d’arrêt rapide de $1\times 10^{-4}$, et un taux d’apprentissage de $1\times 10^{-4}$ est utilisé. L’optimiseur Adam est défini et appliqué à tous les réseaux entraînés. Il est également important de souligner que l’algorithme d’entraînement utilisé pour ces MLP est le même que celui employé pour entraîner les autres modèles, ce qui permet de comparer leurs performances dans des conditions d’entraînement cohérentes. Les résultats de tous les pipelines décrits dans cette section sont analysés dans la section suivante.
