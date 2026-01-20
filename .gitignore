@@ -10,3 +10,5 @@ models/
 poetry.lock
 *.csv
 *.zip
+scripts/
+.ipynb_checkpoints/
